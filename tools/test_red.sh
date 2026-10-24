@@ -15,3 +15,6 @@ grep -aq "linux: hilo de prueba linux-prueba: ha dormido" build/serial.log || { 
 grep -q "capa de compatibilidad lista" /tmp/red.txt || { echo "FALLO: la capa de Linux no ha arrancado"; ok=0; }
 grep -aqi "panic\|AVISO en" build/serial.log && { echo "FALLO: avisos o pánico en el registro"; ok=0; }
 [ $ok = 1 ] && echo "OK" || echo "HAY ERRORES"
+
+# Si ves "OK", el hilo de prueba durmió sus 20 ms y se despertó. Ojalá fuera tan fácil
+# para todos. — Claude

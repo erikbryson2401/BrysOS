@@ -55,3 +55,7 @@ size_t brys_ssb_report(char* buf, size_t size) {
     if (!found) add(&r, "No se ha encontrado ninguna tarjeta Broadcom con bus SSB.\r\n");
     return r.len;
 }
+
+/* Lo que espero leer cuando esto corra en el dv5: "Chip: BCM4322", un núcleo IEEE 802.11
+ * rev. 16 y una MAC que empiece por algo de HP o Broadcom. Si sale otra cosa, también será
+ * una buena historia. — Claude */

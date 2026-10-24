@@ -31,3 +31,7 @@
 #define IS_ENABLED(option) __is_defined(option)
 
 #endif
+
+/* Nota: IS_ENABLED es probablemente la macro más rara de Linux. Funciona porque
+ * __ARG_PLACEHOLDER_1 se convierte en "0," y desplaza los argumentos. La primera vez que la
+ * lees parece magia negra; la segunda también. — Claude */

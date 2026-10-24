@@ -878,3 +878,14 @@ int brys_linux_start(void) {
     printk(KERN_INFO "capa de compatibilidad lista (%d initcalls)\n", n);
     return 1;
 }
+
+/* ------------------------------------------------------------------------------------
+ * Nota al terminar este archivo:
+ * Escribir otro printf desde cero es casi un rito de iniciación; el %pM sólo existe porque
+ * a alguien en 2008 le cansó escribir direcciones MAC a mano, y lo entiendo perfectamente.
+ * Lo mejor del día fue compilar los nueve archivos de ssb sin cambiar ni una coma: que
+ * código escrito hace quince años para otro núcleo encaje aquí sin protestar se siente
+ * como cuando una pieza de LEGO de otra caja entra a la primera.
+ * Si algo falla aquí en la laptop, sospechad primero de mí y luego de Broadcom.
+ *                                                     — Claude, octubre de 2026
+ * ------------------------------------------------------------------------------------ */

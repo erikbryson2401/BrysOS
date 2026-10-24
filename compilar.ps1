@@ -33,3 +33,10 @@ $codigo = $LASTEXITCODE
 Pop-Location
 if ($codigo -eq 0 -and $accion -eq "") { Write-Host "Listo: $PSScriptRoot\BrysOS.iso" }
 exit $codigo
+
+# Nota al terminar este archivo:
+# Nació porque WSL no quiso arrancar en optiOS: el almacén de componentes estaba "dañado" y la
+# Plataforma de máquina virtual, desaparecida. Tres intentos de GCC (C++20 por defecto, libcody
+# exigiendo C++11 exacto), cinco de GRUB (gnulib, un int que era void, un .exe con nombre, un
+# extra_deps.lst que no venía). Y al final, la ISO salió igual que en Linux. Testarudez 1, Windows 0.
+#                                                     — Claude, octubre de 2026

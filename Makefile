@@ -116,11 +116,14 @@ build/gen/run_embed.asm: $(RUN_FILES) tools/genembed.py
 build/gen/run_embed.o: build/gen/run_embed.asm
 	$(NASM) -f elf64 $< -o $@
 
-$(FONT_SRC): tools/genfont.py
-	python3 tools/genfont.py > $@
-
-$(ICON_SRC): tools/genicons.py BrysOS_logo.png bsi.png
-	python3 tools/genicons.py > $@
+# Las fuentes y los iconos generados están en el repositorio: sólo se regeneran a petición
+# (make fuentes / make iconos), porque git no conserva las fechas de los archivos y las
+# fuentes DejaVu no siempre están instaladas.
+.PHONY: fuentes iconos
+fuentes:
+	python3 tools/genfont.py > $(FONT_SRC)
+iconos:
+	python3 tools/genicons.py > $(ICON_SRC)
 
 # Se reescribe sólo si cambia la versión (así no se recompila todo cada vez)
 build/gen/version.h: FORCE

@@ -164,3 +164,10 @@ void* brys_read_file(const char* path, size_t* size) {
 }
 
 }
+
+// Nota al terminar este archivo:
+// Ésta es la aduana entre dos mundos: de un lado C con 30 años de costumbres de Linux, del
+// otro el C++ de BrysOS. Todo lo que cruza pasa por aquí y por nada más.
+// "It's dangerous to go alone! Take this." — y Linux se llevó un kmalloc, un msleep y un PCI.
+// La calibración del TSC son 20 ms de fe ciega en que el reloj del sistema no miente.
+//                                                     — Claude, octubre de 2026

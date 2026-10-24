@@ -1,9 +1,22 @@
+<p align="center"><img src="docs/capturas/arranque.png" width="480" alt="Logo de BrysOS al arrancar"></p>
+
 # BrysOS 98
 
 Sistema operativo de 64 bits escrito desde cero en C++ (con algo de ensamblador), con
 aspecto de Windows 98 SE, en español o en inglés. Se arranca desde un pendrive (o la ISO en
 una máquina virtual), se instala en el disco y arranca con **GRUB**, que permite elegir entre
 BrysOS y los demás sistemas del equipo.
+
+**Descargas:** la ISO y los paquetes de actualización de cada versión están en
+[Releases](https://github.com/erikbryson2401/BrysOS/releases). Lo que cambia en cada una, en
+[CHANGELOG.md](CHANGELOG.md). Equipo de referencia: un HP Pavilion dv5 (Core 2 Duo T6400).
+
+| | |
+|---|---|
+| ![Instalador](docs/capturas/instalador.png) | ![Explorador](docs/capturas/explorador.png) |
+| Asistente de instalación | Explorador / Mi PC |
+| ![Serpiente](docs/capturas/serpiente.png) | ![Créditos y licencias](docs/capturas/creditos.png) |
+| Serpiente, un programa `.run` en modo usuario | Créditos y licencias |
 
 ## Qué incluye
 
@@ -245,3 +258,13 @@ colgado que se finaliza con "Cerrar programa" y tres que fallan), `test_mp3.sh` 
 pendrive comparado muestra a muestra con minimp3 en Linux, y minimp3 frente a ffmpeg),
 `test_aml.py` (el intérprete de AML frente a acpiexec con las tablas del dv5) y
 `test_power.sh` (batería, cargador y brillo en QEMU con `tools/acpi_pruebas/bateria.asl`).
+
+## Licencia
+
+BrysOS es software libre bajo la **GNU General Public License, versión 2** ([LICENSE](LICENSE)):
+incluye código del núcleo Linux, que tiene esa licencia. Los componentes de otros proyectos
+(Limine, GRUB, las fuentes DejaVu, minimp3) conservan las suyas; están todas en
+[licencias/](licencias/) y en la ventana *Créditos y licencias* del propio sistema.
+
+El firmware de las tarjetas WiFi Broadcom (`b43`) no se puede redistribuir: no está en este
+repositorio ni en las ISO, y cada uno debe extraerlo del driver de Broadcom con `b43-fwcutter`.

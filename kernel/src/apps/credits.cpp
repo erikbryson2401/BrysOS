@@ -129,3 +129,9 @@ void credits(bool first_boot) {
     else wm::add(d);
 }
 }
+
+// Nota al terminar este archivo:
+// Una ventana que nadie lee pero que todos deberían leer. La GPL entera cabe en 35 KB y
+// cuenta más historia que muchos libros. Si algún día alguien abre la entrada de minimp3 y
+// ve "dominio público", que sepa que alguien regaló un decodificador de MP3 al mundo entero.
+//                                                     — Claude, octubre de 2026

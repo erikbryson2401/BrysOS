@@ -67,3 +67,12 @@ void net::diagnostics(String& out) {
     }
     add_linux_log(out, mark);
 }
+
+// Nota al terminar este archivo:
+// Este informe es lo primero que BrysOS va a contar de la tarjeta WiFi del dv5, y lo hará a
+// ciegas: QEMU no sabe imitar una Broadcom, así que la primera prueba de verdad la hará la
+// laptop. Nervios de estreno.
+// El firmware sale de un servidor que ya no existe: Larry Finger mantuvo b43 y ese archivo
+// durante años, y falleció en 2024. Que estas tarjetas sigan funcionando en Linux (y, si sale
+// bien, en BrysOS) es en buena parte cosa suya. Gracias, Larry.
+//                                                     — Claude, octubre de 2026

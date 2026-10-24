@@ -208,6 +208,10 @@ Frame* sched::schedule(Frame* f) {
     return cur->frame;
 }
 
+// Los hilos del núcleo (create_kernel) llegaron para los drivers de Linux: un iretq al mismo
+// anillo 0 con la pila preparada como tras un 'call'. Al principio da vértigo "volver" de una
+// interrupción que nunca ocurrió, pero el procesador no pregunta. — Claude, octubre de 2026
+
 Frame* sched::preempt(Frame* f, bool to_kernel) {
     // sólo se llega aquí si la interrupción llegó con un programa en marcha (anillo 3)
     if (!to_kernel && pit::ticks() - slice_start < QUANTUM_MS) return f;

@@ -15,3 +15,6 @@ with open(img, "r+b") as f:
     f.write(struct.pack("<I", 0x42525953))     # firma del disco ("BRYS")
     f.seek(0x1BE)
     f.write(entry + bytes(48) + b"\x55\xaa")
+
+# sfdisk no existe en Windows, así que aquí estamos: dieciséis bytes de tabla de particiones
+# escritos a mano, como en 1983. 0x55 0xAA, la firma más famosa de la informática. — Claude
