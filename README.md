@@ -83,6 +83,27 @@ con Ejecutar > `creditos`.
 Los textos están en `licencias/NN-nombre.txt` (formato en `licencias/LEEME.txt`) y van dentro
 del núcleo. **Al portar código de otro proyecto, añada allí su licencia.**
 
+## Drivers de Linux (en desarrollo)
+
+Para la red, BrysOS usa drivers del núcleo **Linux 6.12** sin modificarlos, sobre una capa de
+compatibilidad propia (`kernel/src/linux/`, GPLv2):
+
+- `include/linux/`: cabeceras que imitan las de Linux (printk, kmalloc, listas, cerrojos, PCI,
+  DMA, modelo de dispositivos...) y `include/linux/kconfig.h`, que hace de `.config`.
+- `brys/base.c`: su implementación en C; `brys/glue.cpp`: la frontera con BrysOS (memoria,
+  tiempo, PCI, IRQ, hilos).
+- `drivers/`: los archivos de Linux tal cual. Por ahora `drivers/ssb` (el bus interno de las
+  tarjetas WiFi Broadcom como la BCM4322 del HP dv5).
+
+Los drivers corren en **hilos del núcleo** cooperativos (como Linux en un solo procesador sin
+expropiación) y pueden compartir líneas de IRQ. La capa arranca la primera vez que se usa la
+orden **`RED`** del Símbolo del sistema, que guarda un informe (`red.txt`) en el pendrive:
+tarjetas de red, núcleos internos de la Broadcom, SPROM (MAC, país) y si está el firmware de
+`b43` en `C:\BrysOS\Firmware\b43`. Ese firmware no se puede redistribuir y nunca va en el
+repositorio ni en la ISO.
+
+Prueba en QEMU (sin tarjeta Broadcom): `tools/test_red.sh`.
+
 ## Energía (ACPI)
 
 El firmware describe la batería, el cargador y el brillo con **AML**, un código que el

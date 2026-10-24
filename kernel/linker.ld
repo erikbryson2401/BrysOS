@@ -47,6 +47,13 @@ SECTIONS
         __init_array_end = .;
     } :rodata
 
+    /* Funciones de inicio del código portado de Linux, por niveles (linux/init.h) */
+    .linux_initcall : AT(ADDR(.linux_initcall) - KVIRT) {
+        __linux_initcall_start = .;
+        KEEP(*(SORT(.linux_initcall.*)))
+        __linux_initcall_end = .;
+    } :rodata
+
     . = ALIGN(4096);
 
     .data : AT(ADDR(.data) - KVIRT) {

@@ -1,0 +1,7 @@
+Novedades de BrysOS 1.3 alfa 2 (versión de prueba, todavía no es la 1.3):
+- Primer paso hacia internet: capa de compatibilidad con drivers de Linux
+  y el driver ssb de las tarjetas WiFi Broadcom.
+- Orden RED en el Símbolo del sistema: guarda en el pendrive (carpeta RED)
+  un informe de las tarjetas de red. Ejecútela y traiga red.txt y
+  registro.txt para el siguiente paso.
+- Hilos del núcleo e interrupciones compartidas.

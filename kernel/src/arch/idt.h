@@ -14,6 +14,11 @@ namespace idt {
 void init();
 // Registra un manejador para la IRQ 0-15 del PIC (vectores 32-47)
 void set_irq_handler(int irq, IrqHandler h);
+// Manejadores adicionales de una línea compartida (PCI): se llaman todos en cada
+// interrupción, hasta 4 por línea. Devuelve false si no queda sitio.
+using SharedIrqHandler = void (*)(void* ctx);
+bool add_irq_handler(int irq, SharedIrqHandler h, void* ctx);
+void remove_irq_handler(int irq, SharedIrqHandler h, void* ctx);
 }
 
 namespace pic {

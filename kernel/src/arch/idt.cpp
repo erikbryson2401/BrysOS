@@ -26,6 +26,9 @@ struct [[gnu::packed]] Idtr {
 
 alignas(16) Gate gates[256];
 IrqHandler irq_handlers[16];
+struct Shared { idt::SharedIrqHandler fn; void* ctx; };
+constexpr int MAX_SHARED = 4;
+Shared shared_handlers[16][MAX_SHARED];
 
 const char* exc_names[32] = {
     "División por cero", "Depuración", "NMI", "Punto de ruptura", "Desbordamiento",
@@ -70,6 +73,8 @@ extern "C" Frame* isr_dispatch(Frame* f) {
         if (irq == 7) { outb(0x20, 0x0B); if (!(inb(0x20) & 0x80)) return f; }
         if (irq == 15) { outb(0xA0, 0x0B); if (!(inb(0xA0) & 0x80)) { outb(0x20, 0x20); return f; } }
         if (irq_handlers[irq]) irq_handlers[irq](f);
+        for (auto& s : shared_handlers[irq])
+            if (s.fn) s.fn(s.ctx);
         pic::eoi(irq);
         // un programa interrumpido: el reloj reparte el tiempo y el teclado o el ratón dan
         // paso enseguida a la interfaz
@@ -93,6 +98,29 @@ void idt::init() {
 void idt::set_irq_handler(int irq, IrqHandler h) {
     irq_handlers[irq] = h;
     pic::unmask(irq);
+}
+
+bool idt::add_irq_handler(int irq, SharedIrqHandler h, void* ctx) {
+    if (irq < 0 || irq >= 16) return false;
+    IrqGuard g;
+    for (auto& s : shared_handlers[irq]) {
+        if (s.fn) continue;
+        s = {h, ctx};
+        pic::unmask(irq);
+        return true;
+    }
+    return false;
+}
+
+void idt::remove_irq_handler(int irq, SharedIrqHandler h, void* ctx) {
+    if (irq < 0 || irq >= 16) return;
+    IrqGuard g;
+    bool any = irq_handlers[irq] != nullptr;
+    for (auto& s : shared_handlers[irq]) {
+        if (s.fn == h && s.ctx == ctx) s = {nullptr, nullptr};
+        if (s.fn) any = true;
+    }
+    if (!any && irq != 2) pic::mask(irq);
 }
 
 // --------------------------------------------------------------------------

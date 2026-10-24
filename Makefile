@@ -2,7 +2,7 @@
 .SUFFIXES:
 
 # Versión del sistema: make VERSION=1.1 (también la usa el paquete de actualización)
-VERSION  ?= 1.3-alfa
+VERSION  ?= 1.3-alfa2
 ISO      := BrysOS.iso
 KERNEL   := build/kernel.elf
 # Prefijo del compilador cruzado: vacío en Linux (g++ del sistema); en Windows (MSYS2),
@@ -45,11 +45,19 @@ RUN_NAMES  := $(sort $(notdir $(wildcard programas/*)))
 RUN_FILES  := $(RUN_NAMES:%=build/run/%.run)
 RUN_LIB    := build/run/obj/sdk/crt0.o build/run/obj/sdk/librun.o
 
+# Código portado de Linux (en C, GPLv2): kernel/src/linux/. Se compila con las cabeceras de
+# compatibilidad de kernel/src/linux/include, que imitan las del núcleo Linux.
+LINUX_CFLAGS := $(filter-out -std=gnu++20 -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit \
+	-Ikernel/src,$(CXXFLAGS)) -std=gnu11 -Ikernel/src/linux/include -Ikernel/src/linux -include linux/kconfig.h -D__KERNEL__ \
+	-fno-common -Wno-sign-compare -Wno-missing-field-initializers -Wno-unused-function -Wno-pointer-sign
+CSRC := $(sort $(shell find kernel/src -name '*.c'))
+
 FONT_SRC := kernel/src/gfx/font_data.cpp
 ICON_SRC := kernel/src/gui/icon_data.cpp
 CXXSRC   := $(sort $(shell find kernel/src -name '*.cpp') $(FONT_SRC) $(ICON_SRC))
 ASMSRC   := $(shell find kernel/src -name '*.asm')
-OBJ      := $(CXXSRC:kernel/src/%.cpp=build/obj/%.o) $(ASMSRC:kernel/src/%.asm=build/obj/%.asm.o)
+OBJ      := $(CXXSRC:kernel/src/%.cpp=build/obj/%.o) $(CSRC:kernel/src/%.c=build/obj/%.c.o) \
+	$(ASMSRC:kernel/src/%.asm=build/obj/%.asm.o)
 
 .PHONY: all iso run run-uefi clean disk bsi release programas FORCE
 
@@ -119,6 +127,10 @@ build/gen/version.h: FORCE
 	@mkdir -p $(dir $@)
 	@echo '#define BRYSOS_VERSION "$(VERSION)"' > $@.tmp
 	@cmp -s $@.tmp $@ || mv $@.tmp $@; rm -f $@.tmp
+
+build/obj/%.c.o: kernel/src/%.c | build/gen/version.h
+	@mkdir -p $(dir $@)
+	$(CROSS)gcc $(LINUX_CFLAGS) -c $< -o $@
 
 build/obj/%.o: kernel/src/%.cpp | build/gen/version.h
 	@mkdir -p $(dir $@)

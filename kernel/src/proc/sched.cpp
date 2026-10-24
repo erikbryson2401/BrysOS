@@ -109,6 +109,52 @@ sched::Thread* sched::create_user(Process* p, uint64_t entry, uint64_t user_stac
     return t;
 }
 
+namespace {
+// Primera instrucción de un hilo del núcleo (llega aquí con iretq, fn en rdi y arg en rsi)
+[[noreturn]] void kernel_entry(void (*fn)(void*), void* arg) {
+    fn(arg);
+    sched::exit_kernel();
+}
+
+// Hilos del núcleo terminados: los libera el hilo 0 (un hilo no puede liberar su propia pila)
+void reap() {
+    for (size_t i = threads.size(); i > 0; i--) {
+        sched::Thread* t = threads[i - 1];
+        if (t != cur && !t->proc && t != &kernel_thread && t->state == sched::State::ZOMBIE) sched::destroy(t);
+    }
+}
+}
+
+sched::Thread* sched::create_kernel(void (*fn)(void*), void* arg, const char* name) {
+    auto* t = new Thread();
+    t->id = next_id++;
+    t->name = name;
+    t->kstack = (uint8_t*)mm::kmalloc(KSTACK);
+    if (!t->kstack) { delete t; return nullptr; }
+    t->kstack_top = ((uint64_t)t->kstack + KSTACK) & ~15ull;
+    memcpy(t->fpu, fpu_init_state, 512);
+    // contexto inicial: iretq al mismo anillo 0, con la pila como tras un 'call'
+    auto* f = (Frame*)(t->kstack_top - 64 - sizeof(Frame));
+    memset(f, 0, sizeof(Frame));
+    f->rip = (uint64_t)&kernel_entry;
+    f->cs = gdt::KCODE;
+    f->rflags = 0x202;
+    f->rsp = t->kstack_top - 8;
+    f->ss = gdt::KDATA;
+    f->rdi = (uint64_t)fn;
+    f->rsi = (uint64_t)arg;
+    t->frame = f;
+    IrqGuard g;
+    threads.push(t);
+    klog("Hilo del núcleo %d: %s\n", t->id, name);
+    return t;
+}
+
+void sched::exit_kernel() {
+    cur->state = State::ZOMBIE;
+    for (;;) yield();
+}
+
 void sched::destroy(Thread* t) {
     if (!t || t == cur || t == &kernel_thread) return;
     {
@@ -150,6 +196,7 @@ bool sched::others_ready() {
 }
 
 void sched::idle() {
+    reap();
     if (others_ready()) yield();
     else hlt();
 }

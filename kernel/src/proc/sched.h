@@ -1,6 +1,6 @@
 #pragma once
-// Planificador: el hilo 0 es el propio núcleo (interfaz gráfica, controladores) y los demás,
-// los programas .run.
+// Planificador: el hilo 0 es el propio núcleo (interfaz gráfica, controladores); los demás
+// son los programas .run y los hilos del núcleo (p. ej. los de los controladores de Linux).
 //
 // Reglas (un solo procesador):
 //  - El código del núcleo nunca se interrumpe para pasar a otro hilo: sólo cambia de hilo
@@ -8,6 +8,8 @@
 //    interrupción del reloj, o cuando lo pide él mismo en un punto seguro (yield).
 //  - El hilo 0 cede el procesador cuando no tiene trabajo (en el bucle de la interfaz).
 //  - Una llamada al sistema se ejecuta entera; si tiene que esperar, cede con yield().
+//  - Los hilos del núcleo son cooperativos: se ejecutan hasta que esperan (sleep, wait) o
+//    ceden; como Linux en un solo procesador sin expropiación.
 // Así no hacen falta cerrojos: en cada momento sólo un hilo está dentro del núcleo fuera
 // de un punto seguro.
 #include <stdint.h>
@@ -28,7 +30,8 @@ struct Thread {
     uint64_t wake_at = 0;            // bloqueado hasta este instante (0 = sin plazo)
     bool (*wait_cond)(void*) = nullptr;   // ...o hasta que esto devuelva true
     void* wait_ctx = nullptr;
-    Process* proc = nullptr;
+    Process* proc = nullptr;         // programa .run (nullptr en los hilos del núcleo)
+    const char* name = "";           // hilos del núcleo: nombre para el registro
     uint64_t cpu_ms = 0;             // tiempo de procesador aproximado
     alignas(16) uint8_t fpu[512];    // estado x87/SSE (FXSAVE)
 };
@@ -36,6 +39,10 @@ struct Thread {
 void init();                         // crea el hilo 0 y activa SSE
 Thread* current();
 Thread* create_user(Process* p, uint64_t entry, uint64_t user_stack, uint64_t arg);
+// Hilo del núcleo: ejecuta fn(arg) en anillo 0 con su propia pila y termina al volver.
+// Empieza la próxima vez que el hilo actual ceda el procesador.
+Thread* create_kernel(void (*fn)(void*), void* arg, const char* name);
+[[noreturn]] void exit_kernel();     // termina el hilo del núcleo actual
 void destroy(Thread* t);             // libera un hilo que no se está ejecutando
 void yield();                        // cede el procesador (punto seguro)
 // Bloquea el hilo actual hasta que pase 'ms' o se cumpla la condición

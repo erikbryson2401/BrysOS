@@ -13,6 +13,7 @@
 #include "bsl/loader.h"
 #include "drivers/acpi.h"
 #include "drivers/audio.h"
+#include "net/diag.h"
 
 namespace {
 constexpr int MAX_LINES = 1000;
@@ -390,6 +391,7 @@ public:
             }
             return;
         }
+        if (c == "RED" || c == "NET") { cmd_red(a); return; }
         if (c == "SONIDO" || c == "SOUND") {
             String rep;
             audio::diagnostics(rep);
@@ -447,6 +449,7 @@ public:
               "MEM                           Muestra el uso de memoria\n"
               "MOVE origen destino           Mueve archivos o carpetas\n"
               "RD [/S] carpeta               Elimina una carpeta\n"
+              "RED [carpeta]                 Informe de las tarjetas de red (en el pendrive)\n"
               "REGISTRO                      Muestra el registro de arranque\n"
               "REN archivo nuevo_nombre      Cambia el nombre\n"
               "SONIDO [carpeta]              Prueba el sonido e informa del códec\n"
@@ -729,6 +732,29 @@ public:
         audio::diagnostics(snd);
         vfs::write_file(vfs::join(dir.c_str(), "sonido.txt").c_str(), snd.c_str(), (uint32_t)snd.size());
         printf(T("Se han guardado %d tablas ACPI, la lista de dispositivos y el registro en %s\n"), saved, dir.c_str());
+    }
+
+    // Informe de red: tarjetas, drivers de Linux y firmware. Se guarda (red.txt) en la carpeta
+    // indicada o, por omisión, en la carpeta RED del primer pendrive.
+    void cmd_red(const Vec<String>& a) {
+        print(T("Iniciando los controladores de red...\n"));
+        String rep;
+        net::diagnostics(rep);
+        print(rep.c_str());
+        String dir;
+        if (a.size() >= 2) dir = full(a[1]);
+        else
+            for (Volume* v : vfs::volumes())
+                if (v->removable && !v->read_only) { dir = String::format("%c:\\RED", v->letter); break; }
+        if (dir.empty()) return;
+        if (!vfs::is_dir(dir.c_str()) && !vfs::mkdir(dir.c_str())) { err(); return; }
+        String path = vfs::join(dir.c_str(), "red.txt");
+        const char* log = log_buffer();
+        if (vfs::write_file(path.c_str(), rep.c_str(), (uint32_t)rep.size()) &&
+            vfs::write_file(vfs::join(dir.c_str(), "registro.txt").c_str(), log, (uint32_t)strlen(log)))
+            printf(T("Informe guardado en %s\n"), path.c_str());
+        else
+            err();
     }
 
     void run_batch(const char* path) {
