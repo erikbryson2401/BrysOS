@@ -6,6 +6,7 @@
 
 class Window;
 class Widget;
+namespace linux_abi { struct State; }
 
 struct Process {
     int pid = 0;
@@ -36,6 +37,9 @@ struct Process {
     String crash_info;
     int exit_code = 0;
     uint64_t started = 0;
+    // Programas de Linux (llamadas 'syscall'): descriptores de archivo, carpeta actual, mmap
+    linux_abi::State* lx = nullptr;
+    uint64_t phdr = 0, phnum = 0, entry = 0;   // para el vector auxiliar (AT_PHDR...)
 };
 
 namespace process {
@@ -54,6 +58,10 @@ bool map_page(Process* p, uint64_t virt, uint64_t phys, bool write, bool owned);
 bool alloc_range(Process* p, uint64_t virt, uint64_t bytes);   // páginas nuevas a cero
 bool user_ok(Process* p, uint64_t addr, uint64_t len, bool write);
 bool user_string(Process* p, uint64_t addr, String& out, size_t max = 4096);
+// Libera las páginas propias de un rango (munmap)
+void free_range(Process* p, uint64_t virt, uint64_t bytes);
+// Copia datos al espacio del programa aunque no sea el activo (pila inicial)
+bool poke(Process* p, uint64_t virt, const void* data, uint64_t len);
 
 // Eventos
 void push_event(Process* p, const Evento& e);

@@ -7,6 +7,8 @@
 #include "lib/string.h"
 #include "lib/vec.h"
 
+extern "C" uint64_t syscall_kstack;   // arch/isr.asm
+
 namespace {
 constexpr uint64_t KSTACK = 32 * 1024;
 constexpr uint64_t QUANTUM_MS = 10;
@@ -35,6 +37,8 @@ void switch_to(sched::Thread* next) {
     fxsave(cur->fpu);
     fxrstor(next->fpu);
     gdt::set_kernel_stack(next->kstack_top);
+    syscall_kstack = next->kstack_top;   // la entrada de 'syscall' (isr.asm) usa la misma pila
+    if (next->fs_base != cur->fs_base) wrmsr(MSR_FS_BASE, next->fs_base);
     uint64_t want = next->cr3 ? next->cr3 : kernel_cr3;
     if (next->proc) process::sync_kernel_half(next->proc);
     if (read_cr3() != want) asm volatile("mov %0, %%cr3" ::"r"(want) : "memory");

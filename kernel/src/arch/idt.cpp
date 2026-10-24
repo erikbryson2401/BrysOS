@@ -6,6 +6,7 @@
 #include "proc/sched.h"
 #include "proc/process.h"
 #include "proc/syscall.h"
+#include "proc/linux.h"
 
 namespace {
 
@@ -61,6 +62,10 @@ extern "C" Frame* isr_dispatch(Frame* f) {
         return f;
     }
     if (f->vector == 0x81) return sched::schedule(f);   // cesión voluntaria (punto seguro)
+    if (f->vector == 0x82) {   // instrucción 'syscall' de un programa de Linux (isr.asm)
+        linux_abi::dispatch(f);
+        return f;
+    }
     if (f->vector < 32) {
         uint64_t cr2 = f->vector == 14 ? read_cr2() : 0;
         panic("Excepción %lu (%s)\nError=%lx RIP=%lx CR2=%lx\nRSP=%lx RAX=%lx RBX=%lx\nRCX=%lx RDX=%lx RSI=%lx RDI=%lx",

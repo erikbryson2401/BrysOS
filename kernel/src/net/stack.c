@@ -125,7 +125,7 @@ static void on_status(struct netif* netif) {
     ip4addr_ntoa_r(netif_ip4_addr(netif), ip, sizeof ip);
     ip4addr_ntoa_r(netif_ip4_gw(netif), gw, sizeof gw);
     char buf[96];
-    snprintf(buf, sizeof buf, "Red: %c%c%u con la dirección %s (puerta de enlace %s)", netif->name[0], netif->name[1],
+    snprintf(buf, sizeof buf, "Red: %c%c%u con la dirección %s (puerta de enlace %s)\n", netif->name[0], netif->name[1],
              netif->num, ip, gw);
     brys_log(buf);
 }
@@ -148,6 +148,14 @@ int brys_stack_start(void) {
     }
     brys_linux_set_poll_hook(poll, 50);
     return nifs;
+}
+
+int brys_stack_dns_server(int i, char* out, unsigned cap) {
+    if (i < 0 || i >= DNS_MAX_SERVERS) return 0;
+    const ip_addr_t* d = dns_getserver((u8_t)i);
+    if (ip_addr_isany(d)) return 0;
+    ip4addr_ntoa_r(ip_2_ip4(d), out, (int)cap);
+    return 1;
 }
 
 int brys_stack_set_dns(const char* server) {

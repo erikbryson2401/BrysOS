@@ -33,6 +33,7 @@ struct Thread {
     Process* proc = nullptr;         // programa .run (nullptr en los hilos del núcleo)
     const char* name = "";           // hilos del núcleo: nombre para el registro
     uint64_t cpu_ms = 0;             // tiempo de procesador aproximado
+    uint64_t fs_base = 0;            // registro FS (memoria local de hilo de los programas de Linux)
     alignas(16) uint8_t fpu[512];    // estado x87/SSE (FXSAVE)
 };
 

@@ -9,6 +9,7 @@
 #include "lib/string.h"
 #include "sys/paths.h"
 #include "kernel.h"
+#include "proc/linux.h"
 
 // Programas incluidos (tools/genembed.py, como las copias de reserva de las .bsl)
 struct EmbeddedRun {
@@ -122,9 +123,13 @@ bool load_elf(Process* p, const uint8_t* d, uint64_t n, uint64_t& entry, String&
                 memcpy((uint8_t*)mm::phys_to_virt(*e & ADDR) + (from - pg), d + ph[i].offset + (from - va), to - from);
         }
         if (va + sz > end) end = va + sz;
+        // cabeceras de programa en memoria (AT_PHDR del vector auxiliar de Linux)
+        if (eh->phoff >= ph[i].offset && eh->phoff < ph[i].offset + ph[i].filesz) p->phdr = va + (eh->phoff - ph[i].offset);
     }
     if (!end || eh->entry < RUN_BASE || eh->entry >= end) { err = T("El programa .run está dañado o no es para BrysOS."); return false; }
     entry = eh->entry;
+    p->phnum = eh->phnum;
+    p->entry = eh->entry;
     p->brk_base = p->brk = (end + 0xFFFF) & ~0xFFFFull;
     return true;
 }
@@ -169,6 +174,28 @@ bool process::alloc_range(Process* p, uint64_t virt, uint64_t bytes) {
         memset(mm::phys_to_virt(ph), 0, 4096);
         *e = ph | mm::PTE_PRESENT | mm::PTE_WRITE | mm::PTE_USER | PTE_OWNED;
         if (process::current() == p) invlpg(pg);
+    }
+    return true;
+}
+
+void process::free_range(Process* p, uint64_t virt, uint64_t bytes) {
+    for (uint64_t pg = virt & ~0xFFFull; pg < virt + bytes; pg += 4096) {
+        uint64_t* e = pte(p, pg, false);
+        if (!e || !(*e & mm::PTE_PRESENT)) continue;
+        if (*e & PTE_OWNED) mm::free_pages(*e & ADDR, 1);
+        *e = 0;
+        if (process::current() == p) invlpg(pg);
+    }
+}
+
+bool process::poke(Process* p, uint64_t virt, const void* data, uint64_t len) {
+    const uint8_t* s = (const uint8_t*)data;
+    while (len) {
+        uint64_t* e = pte(p, virt, false);
+        if (!e || !(*e & mm::PTE_PRESENT)) return false;
+        uint64_t off = virt & 0xFFF, n = min<uint64_t>(len, 4096 - off);
+        memcpy((uint8_t*)mm::phys_to_virt(*e & ADDR) + off, s, n);
+        virt += n; s += n; len -= n;
     }
     return true;
 }
@@ -242,11 +269,19 @@ Process* process::start(const char* path, const char* args, String& err) {
         memcpy(k, p->args.c_str(), n);
         k[n] = 0;
     }
+    // Debajo, la pila inicial que espera un programa de Linux (argc, argv, envp y vector
+    // auxiliar). Un .run no la mira (usa rdi); un programa de Linux no mira rdi.
+    uint64_t sp = (RUN_PILA_TOPE - 4096 - 64) & ~15ull;
     if (ok) {
-        p->thread = sched::create_user(p, entry, (RUN_PILA_TOPE - 4096 - 64) & ~15ull, arg_ptr);
+        p->lx = linux_abi::create_state(p);
+        if (!linux_abi::build_stack(p, sp)) { ok = false; err = T("No hay memoria suficiente para el programa."); }
+    }
+    if (ok) {
+        p->thread = sched::create_user(p, entry, sp, arg_ptr);
         if (!p->thread) { ok = false; err = T("No hay memoria suficiente para el programa."); }
     }
     if (!ok) {
+        linux_abi::destroy_state(p);
         free_space(p);
         delete p;
         return nullptr;
@@ -293,6 +328,7 @@ void process::reap() {
         destroy_windows(p);
         sched::destroy(p->thread);
         p->thread = nullptr;
+        linux_abi::destroy_state(p);   // cierra sus archivos (guarda lo que escribió)
         free_space(p);
         if (p->crashed)
             notice::post(p->name.c_str(),

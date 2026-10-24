@@ -20,6 +20,7 @@
 #include "lib/i18n.h"
 #include "bsl/loader.h"
 #include "proc/sched.h"
+#include "proc/linux.h"
 
 extern "C" void (*__init_array_start[])();
 extern "C" void (*__init_array_end[])();
@@ -54,6 +55,7 @@ extern "C" [[noreturn]] void kmain(uint32_t magic, uint32_t mbi) {
     for (auto* f = __init_array_start; f != __init_array_end; f++) (*f)();
     pit::init(1000);
     sched::init();   // hilo 0 = el núcleo; SSE para los programas .run
+    linux_abi::init();   // instrucción 'syscall' para los programas de Linux
     sti();
     klog("Temporizador PIT a 1000 Hz\n");
 

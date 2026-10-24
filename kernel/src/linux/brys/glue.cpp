@@ -54,11 +54,16 @@ static uint64_t rdtsc() {
 }
 static void calibrate() {
     if (tsc_per_us) return;
+    // puede llegar con las interrupciones desactivadas (desde una llamada al sistema): el
+    // reloj del sistema sólo avanza con ellas activas
+    uint64_t flags = save_irq();
+    sti();
     uint64_t t0 = pit::ticks();
     while (pit::ticks() == t0) asm volatile("pause");
     uint64_t c0 = rdtsc(), t1 = pit::ticks();
     while (pit::ticks() < t1 + 20) asm volatile("pause");
     uint64_t c1 = rdtsc();
+    restore_irq(flags);
     tsc_per_us = (c1 - c0) / 20000;
     if (!tsc_per_us) tsc_per_us = 1;
     klog("Linux: TSC a %lu MHz\n", tsc_per_us);

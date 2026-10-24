@@ -55,6 +55,25 @@ isr_common:
     add rsp, 16
     iretq
 
+; Entrada de la instrucción 'syscall' (programas de Linux). El procesador no cambia de pila:
+; se pasa a la pila del núcleo del hilo y se construye el mismo marco que una interrupción
+; (vector 0x82), así la vuelta es un iretq como siempre. Llega con las interrupciones
+; desactivadas (IA32_FMASK), así que las dos variables globales son seguras.
+global linux_syscall_entry
+global syscall_kstack
+global syscall_user_rsp
+linux_syscall_entry:
+    mov [rel syscall_user_rsp], rsp
+    mov rsp, [rel syscall_kstack]
+    push qword 0x23                 ; ss = datos de usuario | 3
+    push qword [rel syscall_user_rsp]
+    push r11                        ; rflags (la instrucción syscall lo guardó aquí)
+    push qword 0x1b                 ; cs = código de usuario | 3
+    push rcx                        ; rip de vuelta (ídem)
+    push qword 0                    ; código de error
+    push qword 0x82                 ; vector
+    jmp isr_common
+
 ; Excepciones con código de error: 8, 10-14, 17, 21, 29, 30
 %assign i 0
 %rep 256
@@ -65,6 +84,11 @@ isr_common:
 %endif
 %assign i i+1
 %endrep
+
+section .data
+align 8
+syscall_kstack: dq 0                ; cima de la pila del núcleo del hilo actual (sched.cpp)
+syscall_user_rsp: dq 0
 
 section .rodata
 global isr_stub_table
