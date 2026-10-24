@@ -6,8 +6,10 @@
 #include "lib/log.h"
 #include "lib/string.h"
 #include "linux/brys/linux.h"
+#include "net/stack.h"
 #include "mm/memory.h"
 #include "proc/sched.h"
+#include "arch/idt.h"
 
 namespace {
 // Archivos de firmware de b43 que necesita la BCM4322 (núcleo 802.11 rev. 16, N-PHY)
@@ -34,6 +36,27 @@ void add_linux_log(String& out, unsigned from) {
 }
 }
 
+void net::start() {
+    if (brys_linux_start()) klog("Red: drivers de Linux iniciados\n");
+    brys_stack_start();
+}
+
+bool net::wait_for_ip(unsigned ms) {
+    start();
+    uint64_t end = pit::ticks() + ms;
+    while (!brys_stack_has_ip() && pit::ticks() < end) sched::sleep(20);
+    return brys_stack_has_ip();
+}
+
+void net::interfaces(String& out) {
+    start();
+    char* buf = (char*)mm::kmalloc(4096);
+    if (!buf) return;
+    brys_stack_report(buf, 4096);
+    out += buf;
+    mm::kfree(buf);
+}
+
 void net::diagnostics(String& out) {
     out += "Tarjetas de red PCI:\r\n";
     int n = 0;
@@ -48,7 +71,9 @@ void net::diagnostics(String& out) {
 
     // Los drivers de Linux arrancan la primera vez que se pide el informe
     unsigned mark = log_length();
-    if (brys_linux_start()) klog("Red: drivers de Linux iniciados\n");
+    start();
+    out += "\r\nInterfaces de red:\r\n";
+    interfaces(out);
 
     out += "\r\nBus SSB (Broadcom):\r\n";
     char* rep = (char*)mm::kmalloc(8192);

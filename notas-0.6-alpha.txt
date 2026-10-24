@@ -1,0 +1,6 @@
+Novedades de BrysOS 0.6 alpha (versión de prueba):
+- Primera conexión a Internet: tarjetas de red Intel PRO/1000 (las de
+  QEMU y VirtualBox) con el driver e1000 de Linux y TCP/IP con lwIP.
+- Órdenes IPCONFIG y PING en el Símbolo del sistema.
+- En el HP dv5, la orden RED sigue sirviendo para probar el primer paso
+  de la WiFi: traiga RED\red.txt y RED\registro.txt del pendrive.

@@ -74,6 +74,8 @@ int kstrtobool(const char* s, bool* res);
 #define lockdep_assert_not_held(l) do { } while (0)
 
 #define SYSTEM_RUNNING 0
+#define SYSTEM_POWER_OFF 2
+#define SYSTEM_RESTART 3
 #define system_state SYSTEM_RUNNING
 
 #define __round_mask(x, y) ((__typeof__(x))((y) - 1))

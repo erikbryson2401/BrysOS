@@ -15,6 +15,8 @@
 typedef int pci_power_t;
 #define PCI_D0 0
 #define PCI_D3hot 3
+#define PCI_D3cold 4
+#define PCI_STD_NUM_BARS 6
 typedef unsigned int pci_ers_result_t;
 typedef int pci_channel_state_t;
 
@@ -31,6 +33,18 @@ struct resource {
 #define IORESOURCE_MEM 0x200
 
 struct pci_driver;
+struct pci_dev;
+
+/* Recuperación de errores del bus (no se usa: sólo la estructura) */
+enum pci_ers_result_e { PCI_ERS_RESULT_NONE = 1, PCI_ERS_RESULT_CAN_RECOVER = 2, PCI_ERS_RESULT_NEED_RESET = 3,
+                        PCI_ERS_RESULT_DISCONNECT = 4, PCI_ERS_RESULT_RECOVERED = 5 };
+enum { pci_channel_io_normal = 1, pci_channel_io_frozen = 2, pci_channel_io_perm_failure = 3 };
+struct pci_error_handlers {
+    pci_ers_result_t (*error_detected)(struct pci_dev* dev, pci_channel_state_t error);
+    pci_ers_result_t (*mmio_enabled)(struct pci_dev* dev);
+    pci_ers_result_t (*slot_reset)(struct pci_dev* dev);
+    void (*resume)(struct pci_dev* dev);
+};
 
 struct pci_dev {
     struct device dev;
@@ -63,6 +77,7 @@ struct pci_driver {
     int (*suspend)(struct pci_dev* dev, pm_message_t state);
     int (*resume)(struct pci_dev* dev);
     void (*shutdown)(struct pci_dev* dev);
+    const struct pci_error_handlers* err_handler;
     struct device_driver driver;
     struct list_head brys_node;
 };
@@ -94,6 +109,19 @@ void pci_clear_master(struct pci_dev* d);
 static inline int pci_request_regions(struct pci_dev* d, const char* name) { (void)d; (void)name; return 0; }
 static inline void pci_release_regions(struct pci_dev* d) { (void)d; }
 void __iomem* pci_iomap(struct pci_dev* d, int bar, unsigned long maxlen);
+#define pci_ioremap_bar(d, bar) pci_iomap(d, bar, 0)
+#define pci_enable_device_mem pci_enable_device
+int pci_select_bars(struct pci_dev* d, unsigned long flags);
+static inline int pci_request_selected_regions(struct pci_dev* d, int bars, const char* name) { (void)d; (void)bars; (void)name; return 0; }
+static inline void pci_release_selected_regions(struct pci_dev* d, int bars) { (void)d; (void)bars; }
+static inline int pci_set_mwi(struct pci_dev* d) { (void)d; return 0; }
+static inline void pci_clear_mwi(struct pci_dev* d) { (void)d; }
+static inline int pci_enable_wake(struct pci_dev* d, pci_power_t s, bool en) { (void)d; (void)s; (void)en; return 0; }
+static inline int pci_wake_from_d3(struct pci_dev* d, bool en) { (void)d; (void)en; return 0; }
+static inline bool pci_channel_offline(struct pci_dev* d) { (void)d; return false; }
+static inline int pcix_get_mmrbc(struct pci_dev* d) { (void)d; return -EINVAL; }
+static inline int pcix_set_mmrbc(struct pci_dev* d, int m) { (void)d; (void)m; return -EINVAL; }
+static inline bool pci_device_is_present(struct pci_dev* d) { (void)d; return true; }
 static inline void pci_iounmap(struct pci_dev* d, void __iomem* p) { (void)d; (void)p; }
 static inline const char* pci_name(const struct pci_dev* d) { return d->brys_name; }
 static inline void* pci_get_drvdata(struct pci_dev* d) { return dev_get_drvdata(&d->dev); }

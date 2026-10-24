@@ -1,8 +1,9 @@
 Nombre: Linux (drivers de red)
-es: Código del núcleo Linux 6.12 adaptado a BrysOS: el driver ssb de las tarjetas WiFi Broadcom. Está en kernel/src/linux del código fuente de BrysOS, que se distribuye con la misma licencia (GPL versión 2). https://kernel.org
-en: Linux 6.12 kernel code adapted to BrysOS: the ssb driver for Broadcom WiFi cards. It is in kernel/src/linux of the BrysOS source code, which is distributed under the same license (GPL version 2). https://kernel.org
+es: Código del núcleo Linux 6.12 adaptado a BrysOS: los drivers ssb (tarjetas WiFi Broadcom) y e1000 (tarjetas de red Intel PRO/1000). Está en kernel/src/linux del código fuente de BrysOS, que se distribuye con la misma licencia (GPL versión 2). https://kernel.org
+en: Linux 6.12 kernel code adapted to BrysOS: the ssb (Broadcom WiFi cards) and e1000 (Intel PRO/1000 network cards) drivers. It is in kernel/src/linux of the BrysOS source code, which is distributed under the same license (GPL version 2). https://kernel.org
 ---
-Linux kernel 6.12.114 - drivers/ssb (Sonics Silicon Backplane)
+Linux kernel 6.12.114 - drivers/ssb (Sonics Silicon Backplane) and
+drivers/net/ethernet/intel/e1000 (Intel PRO/1000)
 
 Copyright (C) 2005-2008 Michael Buesch <m@bues.ch>
 Copyright (C) 2005, 2006, 2007 Broadcom Corporation
@@ -12,8 +13,9 @@ Copyright (C) 2005 Martin Langer <martin-langer@gmx.de>
 Copyright (C) 2005 Stefano Brivio <st3@riseup.net>
 Copyright (C) 2002 David S. Miller (davem@redhat.com)
 Copyright (C) 2012 Hauke Mehrtens <hauke@hauke-m.de>
+Copyright (C) 1999-2006 Intel Corporation (e1000)
 
-These files are used unmodified. The compatibility layer that lets them run on BrysOS
+These files are used unmodified (e1000_ethtool.c is not included). The compatibility layer that lets them run on BrysOS
 (kernel/src/linux/include and kernel/src/linux/brys) is new code written for BrysOS and is
 distributed under the same license.
 

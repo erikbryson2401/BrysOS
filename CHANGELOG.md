@@ -13,6 +13,19 @@ dentro de cada ISO antigua, `VER` sigue mostrando el número con el que se compi
 - Navegador (NetSurf) con HTTPS y descargas.
 - Vídeo con FFmpeg y YouTube a través de Invidious.
 
+## 0.6 alpha — 24/10/2026
+
+Primera conexión a Internet.
+
+- **Tarjetas de red Intel PRO/1000** con el driver `e1000` de Linux 6.12 sin modificar (QEMU y
+  VirtualBox).
+- **TCP/IP con lwIP 2.2.1**: DHCP, DNS, ICMP, TCP y UDP.
+- Órdenes **`IPCONFIG`** (y `IPCONFIG /DNS servidor`) y **`PING`**, con la misma salida que en Windows.
+- La capa de compatibilidad con Linux crece: paquetes (`sk_buff`), dispositivos de red, NAPI,
+  temporizadores, colas de trabajo, tasklets e interrupciones compartidas, en el hilo
+  `linux-trabajos`.
+- Créditos y licencias: lwIP (BSD) y e1000 (GPLv2).
+
 ## 0.5 alpha (antes 1.3 alfa 2) — 24/10/2026
 
 Primer paso hacia internet.

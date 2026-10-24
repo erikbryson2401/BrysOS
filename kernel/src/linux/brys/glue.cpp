@@ -75,6 +75,7 @@ void brys_udelay(unsigned long us) {
 void brys_sleep_ms(unsigned long ms) { sched::sleep((uint32_t)ms); }
 
 void brys_yield(void) { sched::yield(); }
+void* brys_current_thread(void) { return sched::current(); }
 int brys_kthread(void (*fn)(void*), void* arg, const char* name) {
     return sched::create_kernel(fn, arg, name) ? 0 : -1;
 }
@@ -153,6 +154,22 @@ uint64_t brys_pci_bar(int index, int bar, uint64_t* size) {
     pci::write16(d, 0x04, cmd);
     if (size) *size = mask ? (~mask + 1) : 0;
     return pci::bar_address(d, bar);
+}
+
+uint32_t brys_pci_bar_io(int index, int bar, uint32_t* size) {
+    const PciDevice& d = pci::devices()[(size_t)index];
+    uint8_t off = (uint8_t)(0x10 + bar * 4);
+    uint32_t v = pci::read32(d, off);
+    if (!(v & 1)) { if (size) *size = 0; return 0; }
+    IrqGuard g;
+    uint16_t cmd = pci::read16(d, 0x04);
+    pci::write16(d, 0x04, (uint16_t)(cmd & ~1));   // sin decodificar E/S mientras tanto
+    pci::write32(d, off, 0xFFFFFFFF);
+    uint32_t mask = pci::read32(d, off) & ~3u & 0xFFFF;
+    pci::write32(d, off, v);
+    pci::write16(d, 0x04, cmd);
+    if (size) *size = mask ? ((~mask + 1) & 0xFFFF) : 0;
+    return v & ~3u;
 }
 
 void* brys_read_file(const char* path, size_t* size) {

@@ -19,6 +19,9 @@
 #define CONFIG_SSB_DRIVER_PCICORE 1
 #define CONFIG_SSB_B43_PCI_BRIDGE 1
 
+/* Intel PRO/1000 (82540EM y familia): la tarjeta de QEMU y de VirtualBox */
+#define CONFIG_E1000 1
+
 /* IS_ENABLED(CONFIG_X): 1 si la opción vale 1 (igual que en Linux) */
 #define __ARG_PLACEHOLDER_1 0,
 #define __take_second_arg(__ignored, val, ...) val

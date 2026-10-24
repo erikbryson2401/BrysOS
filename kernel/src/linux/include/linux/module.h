@@ -21,10 +21,14 @@ struct module;
 #define module_param(name, type, perm)
 #define module_param_named(name, value, type, perm)
 #define module_param_array(name, type, nump, perm)
+#define module_param_array_named(name, array, type, nump, perm) static unsigned int* __brys_param_##name __maybe_unused = (nump)
+#define __MODULE_STRING(x) __stringify(x)
 #define try_module_get(m) 1
 #define module_put(m) do { } while (0)
 #define __module_get(m) do { } while (0)
 #define request_module(...) (-ENOSYS)
+#ifndef KBUILD_MODNAME   /* lo pone el Makefile: el nombre de la carpeta del driver */
 #define KBUILD_MODNAME "brysos"
+#endif
 
 #endif

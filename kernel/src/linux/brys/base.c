@@ -9,6 +9,7 @@
 #include <linux/pci.h>
 #include <linux/dma-mapping.h>
 #include <linux/init.h>
+#include <linux/netdevice.h>
 #include <brys/glue.h>
 #include <brys/linux.h>
 
@@ -255,6 +256,12 @@ void print_hex_dump_bytes(const char* prefix, int type, const void* buf, size_t 
         for (size_t j = i; j < len && j < i + 16; j++) n += snprintf(line + n, sizeof line - n, " %02x", p[j]);
         printk("%s\n", line);
     }
+}
+
+void print_hex_dump(const char* level, const char* prefix, int type, int rowsize, int groupsize, const void* buf,
+                    size_t len, bool ascii) {
+    (void)level; (void)rowsize; (void)groupsize; (void)ascii;
+    print_hex_dump_bytes(prefix, type, buf, len);
 }
 
 void dump_stack(void) { printk(KERN_WARNING "(pila no disponible en BrysOS)\n"); }
@@ -708,6 +715,14 @@ static struct pci_dev* new_pci_dev(int index, const struct brys_pci_info* in) {
         u32 lo = brys_pci_read(index, PCI_BASE_ADDRESS_0 + bar * 4, 4);
         if (((lo >> 1) & 3) == 2) bar++;   /* BAR de 64 bits: ocupa dos */
     }
+    for (int bar = 0; bar < 6; bar++) {    /* BAR de puertos de E/S */
+        uint32_t size = 0;
+        uint32_t port = brys_pci_bar_io(index, bar, &size);
+        if (!port || !size) continue;
+        d->resource[bar].start = port;
+        d->resource[bar].end = port + size - 1;
+        d->resource[bar].flags = IORESOURCE_IO;
+    }
     return d;
 }
 
@@ -800,6 +815,13 @@ void pci_clear_master(struct pci_dev* d) {
     d->is_busmaster = false;
 }
 
+int pci_select_bars(struct pci_dev* d, unsigned long flags) {
+    int bars = 0;
+    for (int i = 0; i < 6; i++)
+        if (d->resource[i].flags & flags) bars |= 1 << i;
+    return bars;
+}
+
 void __iomem* pci_iomap(struct pci_dev* d, int bar, unsigned long maxlen) {
     resource_size_t len = pci_resource_len(d, bar);
     if (!len) return NULL;
@@ -868,6 +890,7 @@ static void thread_selftest(void* arg) {
 int brys_linux_start(void) {
     if (started) return 0;
     started = 1;
+    brys_linux_start_worker();
     if (brys_kthread(thread_selftest, "linux-prueba", "linux-prueba"))
         printk(KERN_WARNING "no se ha podido crear el hilo de prueba\n");
     int n = 0;
@@ -876,6 +899,13 @@ int brys_linux_start(void) {
         if (err) printk(KERN_WARNING "initcall %d ha devuelto %d\n", n, err);
     }
     printk(KERN_INFO "capa de compatibilidad lista (%d initcalls)\n", n);
+    /* como "ip link set ethX up" en Linux: se levantan todas las tarjetas de red */
+    rtnl_lock();
+    for (int i = 0; i < brys_netdev_count(); i++) {
+        struct net_device* dev = brys_netdev_get(i);
+        if (dev) dev_open(dev, NULL);
+    }
+    rtnl_unlock();
     return 1;
 }
 

@@ -36,6 +36,19 @@ static inline void outb(u8 v, u16 port) { __asm__ __volatile__("outb %0, %1" ::"
 static inline void outw(u16 v, u16 port) { __asm__ __volatile__("outw %0, %1" ::"a"(v), "Nd"(port)); }
 static inline void outl(u32 v, u16 port) { __asm__ __volatile__("outl %0, %1" ::"a"(v), "Nd"(port)); }
 
+static inline void ioread16_rep(const volatile void* a, void* buf, unsigned long n) {
+    for (u16* p = buf; n--; p++) *p = readw(a);
+}
+static inline void iowrite16_rep(volatile void* a, const void* buf, unsigned long n) {
+    for (const u16* p = buf; n--; p++) writew(*p, a);
+}
+static inline void ioread32_rep(const volatile void* a, void* buf, unsigned long n) {
+    for (u32* p = buf; n--; p++) *p = readl(a);
+}
+static inline void iowrite32_rep(volatile void* a, const void* buf, unsigned long n) {
+    for (const u32* p = buf; n--; p++) writel(*p, a);
+}
+
 void* ioremap(phys_addr_t phys, size_t size);
 #define ioremap_nocache ioremap
 #define ioremap_uc ioremap

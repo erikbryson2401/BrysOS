@@ -109,6 +109,8 @@ def type_text(t):
             mon("sendkey less")
         elif ch == "*":
             mon("sendkey shift-bracket_right")
+        elif ch == "/":
+            mon("sendkey shift-7")
         elif ch.isupper():
             mon(f"sendkey shift-{ch.lower()}")
         else:

@@ -34,6 +34,7 @@ void brys_sleep_ms(unsigned long ms);  /* duerme (cede el procesador) */
 
 /* Hilos e interrupciones */
 void brys_yield(void);
+void* brys_current_thread(void);
 int brys_kthread(void (*fn)(void*), void* arg, const char* name);
 void brys_wait(int (*cond)(void*), void* ctx);   /* duerme hasta que cond(ctx) != 0 */
 unsigned long brys_irq_save(void);
@@ -56,6 +57,8 @@ uint32_t brys_pci_read(int index, int off, int size);
 void brys_pci_write(int index, int off, int size, uint32_t value);
 /* Dirección física y tamaño de un BAR de memoria (0 si no lo es) */
 uint64_t brys_pci_bar(int index, int bar, uint64_t* size);
+/* Puerto y tamaño de un BAR de E/S (0 si no lo es) */
+uint32_t brys_pci_bar_io(int index, int bar, uint32_t* size);
 
 /* Archivos (para cargar firmware): devuelve un búfer de brys_kmalloc o NULL */
 void* brys_read_file(const char* path, size_t* size);

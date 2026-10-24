@@ -14,6 +14,8 @@
 #include "drivers/acpi.h"
 #include "drivers/audio.h"
 #include "net/diag.h"
+#include "net/stack.h"
+#include "proc/sched.h"
 
 namespace {
 constexpr int MAX_LINES = 1000;
@@ -392,6 +394,19 @@ public:
             return;
         }
         if (c == "RED" || c == "NET") { cmd_red(a); return; }
+        if (c == "IPCONFIG") {
+            String rep;
+            net::wait_for_ip(3000);
+            if (a.size() >= 3 && (a[1] == "/DNS" || a[1] == "/dns")) {
+                if (brys_stack_set_dns(a[2].c_str())) { print(T("Dirección de servidor DNS no válida.\n")); return; }
+                printf(T("Servidor DNS: %s\n"), a[2].c_str());
+            }
+            net::interfaces(rep);
+            print(T("\nConfiguración de red:\n\n"));
+            print(rep.c_str());
+            return;
+        }
+        if (c == "PING") { cmd_ping(a); return; }
         if (c == "SONIDO" || c == "SOUND") {
             String rep;
             audio::diagnostics(rep);
@@ -444,6 +459,7 @@ public:
               "DISPOSITIVOS                  Lista el hardware PCI y los discos\n"
               "ECHO texto                    Muestra un mensaje\n"
               "EXIT                          Cierra el símbolo del sistema\n"
+              "IPCONFIG [/DNS servidor]      Muestra la configuración de red\n"
               "LABEL [unidad:] [etiqueta]    Cambia la etiqueta del volumen\n"
               "MD carpeta                    Crea una carpeta\n"
               "MEM                           Muestra el uso de memoria\n"
@@ -755,6 +771,56 @@ public:
             printf(T("Informe guardado en %s\n"), path.c_str());
         else
             err();
+    }
+
+    // PING nombre_o_ip [-n veces]: ecos ICMP, con la misma salida que en Windows
+    void cmd_ping(const Vec<String>& a) {
+        if (!need(a, 2)) return;
+        int count = 4;
+        String host;
+        for (size_t i = 1; i < a.size(); i++) {
+            if ((a[i] == "-n" || a[i] == "-N") && i + 1 < a.size()) {
+                int n = 0;
+                for (const char* p = a[++i].c_str(); *p >= '0' && *p <= '9'; p++) n = n * 10 + (*p - '0');
+                count = clamp(n, 1, 100);
+            } else {
+                host = a[i];
+            }
+        }
+        if (host.empty()) { print(T("Falta un parámetro obligatorio.\n")); return; }
+        if (!net::wait_for_ip(8000)) {
+            print(T("No hay conexión de red: ninguna tarjeta tiene dirección IP (pruebe IPCONFIG).\n"));
+            return;
+        }
+        uint32_t ip;
+        if (brys_stack_resolve(host.c_str(), &ip, 5000)) {
+            printf(T("La solicitud de ping no pudo encontrar el host %s. Compruebe el nombre e inténtelo de nuevo.\n"),
+                   host.c_str());
+            return;
+        }
+        String ips = String::format("%u.%u.%u.%u", ip & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF, ip >> 24);
+        if (ips == host) printf(T("\nHaciendo ping a %s con 32 bytes de datos:\n"), ips.c_str());
+        else printf(T("\nHaciendo ping a %s [%s] con 32 bytes de datos:\n"), host.c_str(), ips.c_str());
+        int ok = 0;
+        unsigned tmin = ~0u, tmax = 0, tsum = 0;
+        for (int i = 0; i < count; i++) {
+            unsigned rtt, ttl;
+            if (brys_stack_ping(ip, (unsigned)i + 1, 2000, &rtt, &ttl) == 0) {
+                printf(T("Respuesta desde %s: bytes=32 tiempo=%ums TTL=%u\n"), ips.c_str(), rtt, ttl);
+                ok++;
+                tsum += rtt;
+                tmin = min(tmin, rtt);
+                tmax = max(tmax, rtt);
+            } else {
+                print(T("Tiempo de espera agotado para esta solicitud.\n"));
+            }
+            if (i + 1 < count) sched::sleep(1000);
+        }
+        printf(T("\nEstadísticas de ping para %s:\n    Paquetes: enviados = %d, recibidos = %d, perdidos = %d (%d%% perdidos)\n"),
+               ips.c_str(), count, ok, count - ok, (count - ok) * 100 / count);
+        if (ok)
+            printf(T("Tiempos aproximados de ida y vuelta en milisegundos:\n    Mínimo = %ums, Máximo = %ums, Media = %ums\n"),
+                   tmin, tmax, tsum / (unsigned)ok);
     }
 
     void run_batch(const char* path) {

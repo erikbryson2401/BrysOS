@@ -131,9 +131,17 @@ build/gen/version.h: FORCE
 	@echo '#define BRYSOS_VERSION "$(VERSION)"' > $@.tmp
 	@cmp -s $@.tmp $@ || mv $@.tmp $@; rm -f $@.tmp
 
+# lwIP (pila TCP/IP, licencia BSD) y su adaptación a BrysOS: con sus propias cabeceras
+LWIP_CFLAGS := $(filter-out -std=gnu++20 -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit \
+	-Ikernel/src,$(CXXFLAGS)) -std=gnu11 -Ikernel/src/net/lwip_port -Ikernel/src/net/lwip/include \
+	-Ikernel/src/linux -fno-common -Wno-sign-compare -Wno-unused-parameter -Wno-address
+build/obj/net/%.c.o: kernel/src/net/%.c | build/gen/version.h
+	@mkdir -p $(dir $@)
+	$(CROSS)gcc $(LWIP_CFLAGS) -c $< -o $@
+
 build/obj/%.c.o: kernel/src/%.c | build/gen/version.h
 	@mkdir -p $(dir $@)
-	$(CROSS)gcc $(LINUX_CFLAGS) -c $< -o $@
+	$(CROSS)gcc $(LINUX_CFLAGS) -DKBUILD_MODNAME='"$(notdir $(patsubst %/,%,$(dir $<)))"' -c $< -o $@
 
 build/obj/%.o: kernel/src/%.cpp | build/gen/version.h
 	@mkdir -p $(dir $@)

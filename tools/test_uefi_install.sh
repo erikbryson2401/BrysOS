@@ -17,3 +17,6 @@ python3 tools/qemu_test.py --uefi --wait 13 'sendkey ret' 'sleep:0.5' 'sendkey r
 python3 -c "import sys; d=open(sys.argv[1],'rb').read(1024); print('GPT:', 'sí' if d[512:520]==b'EFI PART' else 'no')" "$img"
 mdir -i "$img@@1M" ::/EFI/BOOT ::/EFI/BrysOS 2>&1 | grep -iE 'efi|EFI'
 python3 tools/qemu_test.py --uefi --disk --wait 25 shot:u_boot2 2>&1 | iconv -f latin1 -t utf-8 | grep -E 'firmware|rdenes|Unidad C|Pantalla:'
+
+# el disco GPT de esta prueba confunde a las demás (el pendrive deja de ser E:): se repone el normal
+rm -f build/disk.img && make disk >/dev/null 2>&1

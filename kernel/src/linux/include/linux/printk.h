@@ -51,6 +51,8 @@ int vprintk(const char* fmt, va_list args);
 
 void dump_stack(void);
 void print_hex_dump_bytes(const char* prefix, int type, const void* buf, size_t len);
+void print_hex_dump(const char* level, const char* prefix, int type, int rowsize, int groupsize, const void* buf,
+                    size_t len, bool ascii);
 #define DUMP_PREFIX_NONE 0
 #define DUMP_PREFIX_OFFSET 2
 

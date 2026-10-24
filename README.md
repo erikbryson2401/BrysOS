@@ -103,6 +103,18 @@ con Ejecutar > `creditos`.
 Los textos están en `licencias/NN-nombre.txt` (formato en `licencias/LEEME.txt`) y van dentro
 del núcleo. **Al portar código de otro proyecto, añada allí su licencia.**
 
+## Red (en desarrollo)
+
+- **Tarjetas Intel PRO/1000** (`e1000`, driver de Linux sin modificar): la de QEMU y la que
+  VirtualBox pone por defecto.
+- **TCP/IP con [lwIP](https://savannah.nongnu.org/projects/lwip)** (`kernel/src/net/`): DHCP,
+  DNS, ICMP, TCP y UDP. lwIP corre en el hilo de los drivers; `net/stack.c` la une a ellos.
+- Órdenes del Símbolo del sistema: **`IPCONFIG`** (con `/DNS servidor` para elegir el DNS),
+  **`PING nombre [-n veces]`** y **`RED`** (informe completo en el pendrive).
+- La red arranca la primera vez que se usa una de esas órdenes.
+- Prueba en QEMU: `tools/test_net.sh` (DHCP, ping a la puerta de enlace y a `google.com`); el
+  tráfico queda en `build/net.pcap` y se resume con `tools/pcap.py`.
+
 ## Drivers de Linux (en desarrollo)
 
 Para la red, BrysOS usa drivers del núcleo **Linux 6.12** sin modificarlos, sobre una capa de
