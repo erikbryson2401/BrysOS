@@ -51,7 +51,7 @@ struct Package {
 bool load(const char* path, Package& out, String& err);
 
 // <0, 0, >0 como strcmp, comparando número a número ("1.10" > "1.9"); una versión
-// preliminar va antes que la final ("1.3-alfa" < "1.3-beta" < "1.3")
+// preliminar va antes que la final ("1.0-alpha" < "1.0-beta" < "1.0")
 int compare_versions(const char* a, const char* b);
 // Versión que hay en el disco (C:\BrysOS\version.txt) o, si no consta, la que está en marcha
 String installed_version();

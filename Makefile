@@ -285,7 +285,7 @@ clean:
 -include $(OBJ:.o=.d)
 -include $(shell find build/bsl/obj build/run/obj -name "*.d" 2>/dev/null)
 
-# Versión publicada: iso/BrysOS-x.y.iso y bsi/BrysOS-x.y.bsi
+# Versión publicada: iso/BrysOS-<versión>.iso y bsi/BrysOS-<versión>.bsi
 release: $(ISO) bsi
 	@mkdir -p iso
 	cp $(ISO) iso/BrysOS-$(VERSION).iso

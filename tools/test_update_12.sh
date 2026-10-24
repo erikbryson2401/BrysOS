@@ -1,5 +1,5 @@
 #!/bin/sh
-# Actualización de la 1.1.1 publicada (iso/BrysOS-1.1.1.iso) a la 1.2 con su .bsi:
+# Actualización de la 0.2.1 alpha publicada (iso/BrysOS-0.2.1-alpha.iso, antes 1.1.1) a la 0.3 con su .bsi:
 #  1. instala la 1.1.1 en un disco vacío
 #  2. aplica el paquete 1.2 (núcleo + bibliotecas) desde un pendrive con el Actualizador
 #  3. arranca la 1.2: versión, bibliotecas, programas .run instalados y energía (AML)
@@ -9,7 +9,7 @@ make -j8 >/dev/null 2>&1
 rm -f build/disk.img
 make disk >/dev/null 2>&1
 dd if=/dev/zero of=build/disk.img bs=1M count=1 conv=notrunc status=none
-ISO=iso/BrysOS-1.1.1.iso python3 tools/qemu_test.py --wait 9 'sendkey ret' 'sleep:0.5' 'sendkey ret' 'sleep:0.5' \
+ISO=iso/BrysOS-0.2.1-alpha.iso python3 tools/qemu_test.py --wait 9 'sendkey ret' 'sleep:0.5' 'sendkey ret' 'sleep:0.5' \
     'sendkey ret' 'sleep:0.5' 'sendkey ret' 'sleep:1.5' 'sendkey ret' 'sleep:1' 'sendkey ret' 'sleep:0.6' \
     'sendkey ret' 'sleep:5' shot:u12_inst >/dev/null 2>&1
 echo "== instalada: $(mtype -i build/disk.img@@1M ::/BRYSOS/VERSION.TXT)"

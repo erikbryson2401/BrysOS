@@ -70,7 +70,7 @@ Primer paso hacia internet.
 - **Visor de imágenes** (BMP, PNG, JPEG y GIF animado) y **Reproductor de sonido** (WAV).
 - Orden `ACPI`: guarda las tablas del equipo en el pendrive.
 - Corrige un fallo de FAT32 al crear archivos con nombre corto.
-- Desde la 0.1 (1.0) hay que usar el paquete que sólo trae el núcleo (`BrysOS-1.1.bsi`).
+- Desde la 0.1 (1.0) hay que usar el paquete que sólo trae el núcleo (`BrysOS-0.2-alpha.bsi`).
 
 ## 0.1 alpha (antes 1.0) — 18/10/2026
 

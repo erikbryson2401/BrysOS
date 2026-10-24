@@ -193,22 +193,25 @@ Para hacer sitio a BrysOS junto a Windows, reduzca antes un volumen desde *Admin
 discos*. GRUB necesita que la primera partición empiece en el sector 2048 (Vista o
 posterior) y se guarda una copia del MBR original en `C:\BrysOS\mbr-original.bin`.
 
-Cada versión publicada se guarda en `iso/BrysOS-x.y.iso` y `bsi/BrysOS-x.y.bsi`
-(`make release VERSION=x.y`).
+Cada versión publicada se guarda en `iso/BrysOS-<versión>.iso` y `bsi/BrysOS-<versión>.bsi`
+(`make release VERSION=0.7-alpha`), y se sube a *Releases*. Las de prueba son `x.y-alpha`;
+la primera final será la `1.0`. La etiqueta de git lleva siempre tres números
+(`v0.7.0-alpha`, `v1.0.0`): GitHub ordena los releases por versión y, si una etiqueta no los
+tiene, la pone fuera de orden.
 
 ## Actualizar (paquetes .bsi)
 
 Una versión nueva no hace falta instalarla desde cero: basta con un **paquete de
 actualización `.bsi`**.
 
-1. En el PC de desarrollo: `make bsi VERSION=1.2` crea `BrysOS-1.2.bsi` con el núcleo y las
-   bibliotecas (si existe `notas-1.2.txt`, su texto se muestra en el Actualizador). Para añadir
-   otros archivos o borrar alguno se usa `tools/mkbsi.py` directamente (`--delete ruta`,
-   `origen:destino`, carpetas enteras).
-   - **Desde la 1.0**: use `BrysOS-1.1.bsi`, que sólo trae el núcleo
-     (`make bsi VERSION=1.1 BSI_LIBS=0`). El actualizador de la 1.0 tiene un fallo de FAT32 con
-     los archivos de nombre corto que estropearía un paquete con varios archivos; el núcleo 1.1
-     instala él mismo sus bibliotecas al arrancar. Los paquetes con bibliotecas exigen la 1.1.
+1. En el PC de desarrollo: `make bsi VERSION=0.7-alpha` crea `BrysOS-0.7-alpha.bsi` con el
+   núcleo y las bibliotecas (si existe `notas-0.7-alpha.txt`, su texto se muestra en el
+   Actualizador). Para añadir otros archivos o borrar alguno se usa `tools/mkbsi.py`
+   directamente (`--delete ruta`, `origen:destino`, carpetas enteras).
+   - **Desde la 0.1 alpha** (la primera, que por dentro dice 1.0): use `BrysOS-0.2-alpha.bsi`,
+     que sólo trae el núcleo (`BSI_LIBS=0`). Su actualizador tiene un fallo de FAT32 con los
+     archivos de nombre corto que estropearía un paquete con varios archivos; el núcleo nuevo
+     instala él mismo sus bibliotecas al arrancar. Los paquetes con bibliotecas exigen la 0.2.
 2. Copie el `.bsi` a un pendrive FAT32 y conéctelo al equipo con BrysOS en marcha: aparece
    como unidad nueva (D:, E:...) en Mi PC.
 3. Haga doble clic en el paquete. El **Actualizador de BrysOS** muestra la versión instalada,

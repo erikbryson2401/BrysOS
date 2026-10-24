@@ -2,7 +2,7 @@
 """Crea un paquete de actualización de BrysOS (.bsi).
 
 Uso:
-  mkbsi.py -o BrysOS-1.1.bsi --version 1.1 [--name "BrysOS 1.1"] [--min-version 1.0]
+  mkbsi.py -o BrysOS-0.7-alpha.bsi --version 0.7-alpha [--name "BrysOS 0.7 alpha"] [--min-version 0.2]
            [--reboot] [--desc "texto"]... [--desc-file notas.txt]
            [--delete ruta]... ORIGEN[:DESTINO]...
 
