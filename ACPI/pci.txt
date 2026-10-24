@@ -1,0 +1,25 @@
+00:00.0  8086:2a40  clase 06.00.00  Puente de host
+00:02.0  8086:2a42  clase 03.00.00  Pantalla
+00:02.1  8086:2a43  clase 03.80.00  Pantalla
+00:1a.0  8086:2937  clase 0c.03.00  Controladora USB
+00:1a.1  8086:2938  clase 0c.03.00  Controladora USB
+00:1a.7  8086:293c  clase 0c.03.20  Controladora USB
+00:1b.0  8086:293e  clase 04.03.00  Multimedia
+00:1c.0  8086:2940  clase 06.04.00  Puente PCI
+00:1c.1  8086:2942  clase 06.04.00  Puente PCI
+00:1c.2  8086:2944  clase 06.04.00  Puente PCI
+00:1c.3  8086:2946  clase 06.04.00  Puente PCI
+00:1c.4  8086:2948  clase 06.04.00  Puente PCI
+00:1c.5  8086:294a  clase 06.04.00  Puente PCI
+00:1d.0  8086:2934  clase 0c.03.00  Controladora USB
+00:1d.1  8086:2935  clase 0c.03.00  Controladora USB
+00:1d.2  8086:2936  clase 0c.03.00  Controladora USB
+00:1d.3  8086:2939  clase 0c.03.00  Controladora USB
+00:1d.7  8086:293a  clase 0c.03.20  Controladora USB
+00:1e.0  8086:2448  clase 06.04.01  Puente PCI
+00:1f.0  8086:2919  clase 06.01.00  Puente ISA
+00:1f.2  8086:2929  clase 01.06.01  Controladora SATA
+00:1f.3  8086:2930  clase 0c.05.00  SMBus
+00:1f.6  8086:2932  clase 11.80.00  Otro
+02:00.0  14e4:432b  clase 02.80.00  Red
+03:00.0  10ec:8136  clase 02.00.00  Red

@@ -1,0 +1,12 @@
+Novedades de BrysOS 1.1:
+- USB 2.0: los pendrives van a alta velocidad.
+- Los pendrives se pueden escribir; "Expulsar" los quita con seguridad.
+- Volumen: altavoz junto al reloj, teclas de volumen del portátil y
+  Panel de control (también el volumen del sonido de inicio).
+- Bibliotecas del sistema (.bsl): lenguajes, imágenes y sonido.
+- Visor de imágenes (BMP, PNG, JPEG y GIF animado).
+- Reproductor de sonido (WAV).
+- Orden ACPI: guarda las tablas del equipo en el pendrive.
+- Corrige un fallo de FAT32 al crear archivos con nombre corto.
+Este paquete sólo trae el núcleo: al arrancar, BrysOS 1.1 instala
+sus bibliotecas en C:\BrysOS\BSL.

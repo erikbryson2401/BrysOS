@@ -1,0 +1,64 @@
+Dispositivo: HD Audio (códec 111d:76b2)
+Volumen 18
+Prueba de 440 Hz: en marcha; posición de lectura 2389 -> 14388 (la tarjeta lee el búfer)
+Controladora: GCAP=4401 STATESTS=000b órdenes CORB/RIRB
+Códec 0: 111d76b2, subsistema 103c3621, AFG 1, GPIO: 8 (GPIO0 activado)
+  GPIO máscara 01 dirección 01 datos 01
+Pines de salida configurados: 13 10
+
+Nodo 10: pin, caps 00400181, energía 0, conexiones 16 17 23 (elegida 0)
+    pin: caps 0000001c, configuración 0221101f, control c0, EAPD 00
+Nodo 11: pin, caps 00400081, energía 0
+    pin: caps 00001724, configuración 02a11020, control 00, EAPD 00
+Nodo 12: pin, caps 00400081, energía 0
+    pin: caps 00001724, configuración 40f000f0, control 00, EAPD 00
+Nodo 13: pin, caps 00400181, energía 0, conexiones 16 17 23 (elegida 0)
+    pin: caps 00000014, configuración 90171110, control 40, EAPD 00
+Nodo 14: pin, caps 00400081, energía 0
+    pin: caps 00001724, configuración 28a1102e, control 00, EAPD 00
+Nodo 15: pin, caps 00400181, energía 0, conexiones 16 17 23 (elegida 0)
+    pin: caps 00000014, configuración 40f000f2, control 00, EAPD 00
+Nodo 16: salida, caps 000d0c05, energía 0
+    amp. salida: caps 80027f7f, ganancia I 7f D 7f
+Nodo 17: salida, caps 000d0c05, energía 33
+    amp. salida: caps 80027f7f, ganancia I ff D ff
+Nodo 18: entrada, caps 001d0541, energía 33, conexiones 28 (elegida 0)
+Nodo 19: entrada, caps 001d0541, energía 33, conexiones 29 (elegida 0)
+Nodo 20: pin, caps 00400100, energía 0, conexiones 22 (elegida 0)
+    pin: caps 00000010, configuración 40f000f3, control 00, EAPD 00
+Nodo 21: selector, caps 00300101, energía 0, conexiones 16 17 23 (elegida 0)
+Nodo 22: mezclador, caps 00200100, energía 0, conexiones 21 (elegida 0)
+Nodo 23: mezclador, caps 0020010b, energía 0, conexiones 16 17 39 26 27 (elegida 0)
+    amp. entrada 0: ganancia I 97 D 97
+Nodo 24: pin, caps 0040000d, energía 0
+    pin: caps 00000020, configuración 90a60370, control 00, EAPD 00
+    amp. salida: caps 00270300, ganancia I 00 D 00
+Nodo 25: pin, caps 0040000d, energía 0
+    pin: caps 00000020, configuración 40f000f5, control 00, EAPD 00
+    amp. salida: caps 00270300, ganancia I 00 D 00
+Nodo 26: selector, caps 0030010d, energía 0, conexiones 11 12 14 (elegida 0)
+    amp. salida: caps 00270300, ganancia I 00 D 00
+Nodo 27: selector, caps 0030010d, energía 0, conexiones 11 12 14 (elegida 0)
+    amp. salida: caps 00270300, ganancia I 00 D 00
+Nodo 28: selector, caps 0030090d, energía 0, conexiones 26 23 24 25 (elegida 0)
+    amp. salida: caps 80050f00, ganancia I 80 D 80
+Nodo 29: selector, caps 0030090d, energía 0, conexiones 27 23 24 25 (elegida 0)
+    amp. salida: caps 80050f00, ganancia I 80 D 80
+Nodo 30: pin, caps 00400301, energía 0, conexiones 36 (elegida 0)
+    pin: caps 00000010, configuración 214410a0, control 00, EAPD 00
+Nodo 31: pin, caps 00400701, energía 33, conexiones 36 37 (elegida 0)
+    pin: caps 00010010, configuración 40f100f5, control 00, EAPD 00
+Nodo 32: pin, caps 00400301, energía 0, conexiones 37 (elegida 0)
+    pin: caps 00000010, configuración 40f100f6, control 00, EAPD 00
+Nodo 33: salida, caps 00040211, energía 0
+Nodo 34: salida, caps 00040211, energía 0
+Nodo 35: otro, caps 00f00000, energía 0
+Nodo 36: selector, caps 00300101, energía 0, conexiones 33 28 29 (elegida 0)
+Nodo 37: selector, caps 00300101, energía 0, conexiones 34 28 29 (elegida 0)
+Nodo 38: pitido, caps 0070000c, energía 0
+    amp. salida: caps 80170303, ganancia I 00 D 00
+Nodo 39: pin, caps 00400000, energía 0
+    pin: caps 00000020, configuración 40f000f7, control 00, EAPD 00
+Nodo 40: volumen, caps 00600000, energía 0
+
+Flujo: CTL 00140002 STS 00 LPIB 58712 CBL 65536

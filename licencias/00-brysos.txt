@@ -1,0 +1,14 @@
+Nombre: BrysOS 98
+es: El sistema operativo: núcleo, controladores, interfaz, aplicaciones, bibliotecas .bsl, SDK, iconos, logo y sonido de inicio.
+en: The operating system: kernel, drivers, user interface, applications, .bsl libraries, SDK, icons, logo and startup sound.
+---
+BrysOS 98
+Copyright (c) 2026 los autores de BrysOS.
+
+Escrito desde cero en C++ y ensamblador. Incluye componentes de otros
+proyectos, que se enumeran en esta ventana junto con sus licencias. Cada uno
+conserva su licencia y sus avisos de copyright originales.
+
+Written from scratch in C++ and assembly. It includes components from other
+projects, which are listed in this window together with their licenses. Each
+one keeps its original license and copyright notices.

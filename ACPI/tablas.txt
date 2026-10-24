@@ -1,0 +1,11 @@
+XSDT.DAT  100 bytes
+FACP.DAT  244 bytes
+HPET.DAT  56 bytes
+APIC.DAT  108 bytes
+MCFG.DAT  60 bytes
+ASF_.DAT  165 bytes
+SLIC.DAT  374 bytes
+BOOT.DAT  40 bytes
+SSDT.DAT  1621 bytes
+DSDT.DAT  47465 bytes
+FACS.DAT  64 bytes

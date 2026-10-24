@@ -1,0 +1,10 @@
+Novedades de BrysOS 1.2:
+- Programas .run (como los .exe): se ejecutan aparte del sistema; si uno
+  falla o se cuelga, el resto sigue. Ctrl+Alt+Supr abre "Cerrar programa".
+  Incluye dos de ejemplo en Inicio > Programas: Hola y Serpiente.
+- Batería y brillo: icono de la pila en la barra de tareas y Medidor de
+  energía con la carga, el tiempo restante y el brillo de la pantalla.
+  Avisos de batería baja. Orden ENERGIA para ver los detalles.
+- El Reproductor de sonido abre MP3.
+- Fondo de escritorio (clic derecho en el escritorio, Panel de control o
+  "Usar como fondo" en el Visor de imágenes).

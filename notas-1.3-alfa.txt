@@ -1,0 +1,7 @@
+Novedades de BrysOS 1.3 alfa (versión de prueba, todavía no es la 1.3):
+- Créditos y licencias: BrysOS incluye componentes de otros proyectos
+  (Limine, GRUB, las fuentes DejaVu y minimp3). Una ventana muestra sus
+  autores y licencias al iniciar el sistema, hasta que se marca "No volver
+  a mostrar". También se abre desde Inicio > Ayuda o con Ejecutar >
+  creditos.
+- Primera versión compilada en Windows (MSYS2 y GCC 15.2).

@@ -1,0 +1,19 @@
+# Archivos generados al compilar
+/build/
+/BrysOS.iso
+
+# Versiones publicadas: van como "releases" de GitHub, no dentro del repositorio
+/iso/
+/bsi/
+
+# Firmware de terceros que no se puede redistribuir (p. ej. el de las tarjetas Broadcom b43):
+# nunca debe subirse
+firmware/
+*.fw
+
+# Python
+__pycache__/
+*.pyc
+
+# Tabla ACPI SLIC de la laptop (relacionada con la licencia OEM de Windows): no se publica
+/ACPI/SLIC.DAT
