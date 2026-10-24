@@ -33,7 +33,7 @@ enum {
 
 // --- Descriptores de archivo
 struct Fd {
-    enum Type { CONSOLE_IN, CONSOLE_OUT, FILE, DIR, NUL, ZERO, RANDOM, MEMFILE, SOCKET } type;
+    enum Type { CONSOLE_IN, CONSOLE_OUT, FILE, DIR, NUL, ZERO, RANDOM, MEMFILE, SOCKET, EVENTFD, PIPE_R, PIPE_W } type;
     String path;                // ruta de BrysOS (FILE, DIR)
     uint8_t* data = nullptr;    // contenido completo (FILE, MEMFILE)
     uint64_t size = 0, cap = 0, pos = 0;
@@ -43,6 +43,17 @@ struct Fd {
     size_t dir_next = 0;
     int refs = 1;
     void* sock = nullptr;       // SOCKET (net/socket.c)
+    uint64_t counter = 0;       // EVENTFD
+    bool semaphore = false;
+    struct Pipe* pipe = nullptr;   // PIPE_R, PIPE_W
+};
+
+// Tubería: búfer circular compartido por el extremo de lectura y el de escritura
+struct Pipe {
+    static constexpr uint64_t CAP = 65536;
+    uint8_t buf[CAP];
+    uint64_t head = 0, len = 0;
+    int readers = 1, writers = 1;
 };
 
 struct Map {
@@ -126,6 +137,11 @@ void release(Fd* f) {
     if (--f->refs > 0) return;
     flush(f);
     if (f->type == Fd::SOCKET && f->sock) brys_socket_close(f->sock);
+    if (f->pipe) {
+        if (f->type == Fd::PIPE_R) f->pipe->readers--;
+        else f->pipe->writers--;
+        if (!f->pipe->readers && !f->pipe->writers) delete f->pipe;
+    }
     mm::kfree(f->data);
     delete f;
 }
@@ -274,6 +290,8 @@ int64_t stat_fd(Fd* f, LinuxStat& s) {
         return 0;
     case Fd::MEMFILE: fill_stat(s, S_IFREG | 0644, f->size, nullptr, (uint64_t)f); return 0;
     case Fd::SOCKET: fill_stat(s, 0140000 | 0777, 0, nullptr, (uint64_t)f); return 0;
+    case Fd::PIPE_R: case Fd::PIPE_W: fill_stat(s, 0010000 | 0600, 0, nullptr, (uint64_t)f->pipe); return 0;
+    case Fd::EVENTFD: fill_stat(s, 0600, 0, nullptr, (uint64_t)f); return 0;
     case Fd::DIR: fill_stat(s, S_IFDIR | 0755, 0, nullptr, hash_ino(f->path)); return 0;
     case Fd::FILE: {
         VfsEntry e;
@@ -381,6 +399,30 @@ int64_t do_read(Fd* f, uint8_t* buf, uint64_t n) {
         return (int64_t)k;
     }
     case Fd::SOCKET: return brys_socket_recv(f->sock, buf, n, (f->flags & O_NONBLOCK) != 0);
+    case Fd::EVENTFD: {
+        if (n < 8) return err(EINVAL);
+        while (!f->counter) {
+            if (f->flags & O_NONBLOCK) return err(EAGAIN);
+            sched::sleep(2);
+        }
+        uint64_t v = f->semaphore ? 1 : f->counter;
+        f->counter -= v;
+        memcpy(buf, &v, 8);
+        return 8;
+    }
+    case Fd::PIPE_R: {
+        Pipe* pp = f->pipe;
+        while (!pp->len) {
+            if (!pp->writers) return 0;
+            if (f->flags & O_NONBLOCK) return err(EAGAIN);
+            sched::sleep(2);
+        }
+        uint64_t k = min(n, pp->len);
+        for (uint64_t i = 0; i < k; i++) buf[i] = pp->buf[(pp->head + i) % Pipe::CAP];
+        pp->head = (pp->head + k) % Pipe::CAP;
+        pp->len -= k;
+        return (int64_t)k;
+    }
     case Fd::DIR: return err(EISDIR);
     default: return err(EBADF);
     }
@@ -402,6 +444,31 @@ int64_t do_write(State* s, Fd* f, const uint8_t* buf, uint64_t n) {
         return (int64_t)n;
     }
     case Fd::SOCKET: return brys_socket_send(f->sock, buf, n, (f->flags & O_NONBLOCK) != 0);
+    case Fd::EVENTFD: {
+        if (n < 8) return err(EINVAL);
+        uint64_t v;
+        memcpy(&v, buf, 8);
+        f->counter += v;
+        return 8;
+    }
+    case Fd::PIPE_W: {
+        Pipe* pp = f->pipe;
+        uint64_t done = 0;
+        while (done < n) {
+            if (!pp->readers) return done ? (int64_t)done : err(EPIPE);
+            uint64_t room = Pipe::CAP - pp->len;
+            if (!room) {
+                if (f->flags & O_NONBLOCK) return done ? (int64_t)done : err(EAGAIN);
+                sched::sleep(2);
+                continue;
+            }
+            uint64_t k = min(n - done, room);
+            for (uint64_t i = 0; i < k; i++) pp->buf[(pp->head + pp->len + i) % Pipe::CAP] = buf[done + i];
+            pp->len += k;
+            done += k;
+        }
+        return (int64_t)done;
+    }
     default: return err(EBADF);
     }
 }
@@ -585,6 +652,9 @@ int64_t sys(uint64_t n, uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t
                 if (!f) { if (fds[i].fd >= 0) { fds[i].revents = 0x20; ready++; } continue; }   // POLLNVAL
                 short ev = 0;
                 if (f->type == Fd::SOCKET) ev = (short)brys_socket_poll(f->sock);
+                else if (f->type == Fd::EVENTFD) ev = (short)((f->counter ? 0x1 : 0) | 0x4);
+                else if (f->type == Fd::PIPE_R) ev = (short)((f->pipe->len ? 0x1 : 0) | (f->pipe->writers ? 0 : 0x10));
+                else if (f->type == Fd::PIPE_W) ev = (short)((f->pipe->len < Pipe::CAP ? 0x4 : 0) | (f->pipe->readers ? 0 : 0x8));
                 else ev = 0x1 | 0x4;   // POLLIN | POLLOUT
                 fds[i].revents = (short)(ev & (fds[i].events | 0x8 | 0x10));   // + POLLERR, POLLHUP
                 if (fds[i].revents) ready++;
@@ -909,6 +979,39 @@ int64_t sys(uint64_t n, uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t
         if (!uok(a, b, true)) return err(EFAULT);
         random::bytes((void*)a, b);
         return (int64_t)b;
+    }
+    case 284: case 290: {                                                 // eventfd, eventfd2
+        auto* f = new Fd();
+        f->type = Fd::EVENTFD;
+        f->counter = (uint32_t)a;
+        uint64_t fl = n == 290 ? b : 0;
+        f->semaphore = fl & 1;
+        f->flags = (uint32_t)(fl & O_NONBLOCK);
+        int fd = alloc_fd(s, f, 0, fl & O_CLOEXEC);
+        if (fd < 0) { release(f); return err(EMFILE); }
+        return fd;
+    }
+    case 22: case 293: {                                                  // pipe, pipe2
+        if (!uok(a, 8, true)) return err(EFAULT);
+        uint64_t fl = n == 293 ? b : 0;
+        auto* pp = new Pipe();
+        auto* r = new Fd();
+        r->type = Fd::PIPE_R;
+        r->pipe = pp;
+        auto* w = new Fd();
+        w->type = Fd::PIPE_W;
+        w->pipe = pp;
+        r->flags = w->flags = (uint32_t)(fl & O_NONBLOCK);
+        int fr = alloc_fd(s, r, 0, fl & O_CLOEXEC);
+        int fw = fr < 0 ? -1 : alloc_fd(s, w, 0, fl & O_CLOEXEC);
+        if (fr < 0 || fw < 0) {
+            if (fr >= 0) close_fd(s, fr); else release(r);
+            release(w);
+            return err(EMFILE);
+        }
+        ((int32_t*)a)[0] = fr;
+        ((int32_t*)a)[1] = fw;
+        return 0;
     }
     case 332: return err(ENOSYS);                                         // statx: musl usa fstatat
     case 41: return brys_linux_socket(s, (int)a, (int)b, (int)c);         // socket

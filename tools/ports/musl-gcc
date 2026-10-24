@@ -1,0 +1,16 @@
+#!/bin/sh
+# Compila programas de Linux estáticos con musl y el GCC cruzado de BrysOS (x86_64-elf).
+# Los ejecutables resultantes los ejecuta BrysOS con su ABI de Linux (llamadas 'syscall').
+M=/e/BrysOS-dev/musl
+SYS=/e/BrysOS-dev/sysroot
+GCCINC=$(x86_64-elf-gcc -print-file-name=include)
+# los programas son "de Linux": se definen las macros que pone el GCC de Linux
+LNX="-D__linux__=1 -D__linux=1 -Dlinux=1 -D__gnu_linux__=1 -D__unix__=1 -D__unix=1 -Dunix=1"
+link=1
+for a in "$@"; do case "$a" in -c|-S|-E|-M|-MM) link=0;; esac; done
+if [ $link = 1 ]; then
+  exec x86_64-elf-gcc $LNX -Wa,--noexecstack -static -no-pie -nostdinc -isystem "$M/include" -isystem "$SYS/include" -isystem "$GCCINC" -nostdlib \
+    "$M/lib/crt1.o" "$M/lib/crti.o" "$@" -L"$SYS/lib" -L"$M/lib" -Wl,--start-group -lc -lgcc -Wl,--end-group "$M/lib/crtn.o"
+else
+  exec x86_64-elf-gcc $LNX -Wa,--noexecstack -nostdinc -isystem "$M/include" -isystem "$SYS/include" -isystem "$GCCINC" "$@"
+fi
