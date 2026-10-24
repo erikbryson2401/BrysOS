@@ -60,6 +60,9 @@ uint64_t brys_pci_bar(int index, int bar, uint64_t* size);
 /* Puerto y tamaño de un BAR de E/S (0 si no lo es) */
 uint32_t brys_pci_bar_io(int index, int bar, uint32_t* size);
 
+/* Aleatorios para criptografía (lib/random) */
+void brys_random(void* out, size_t n);
+
 /* Archivos (para cargar firmware): devuelve un búfer de brys_kmalloc o NULL */
 void* brys_read_file(const char* path, size_t* size);
 

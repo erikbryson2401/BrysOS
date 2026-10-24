@@ -1,8 +1,9 @@
 // ABI de Linux x86-64: llamadas al sistema de los programas de Linux (musl) sobre BrysOS.
 // Lo mismo que hace WSL1 en Windows o el "Linuxulator" de FreeBSD: los números, estructuras y
 // códigos de error son los de Linux, y por debajo están el VFS, la memoria y los hilos de
-// BrysOS. Rutas: "/c/..." es C:\..., "/tmp" es C:\Temp y lo demás cuelga de C:\ (por ejemplo,
-// /usr/share/x es C:\usr\share\x); /dev/null, /dev/urandom y /etc/resolv.conf son virtuales.
+// BrysOS. Rutas: "/c/..." es C:\..., "/tmp" es C:\Temp y lo demás cuelga de C:\BrysOS\Linux
+// (por ejemplo, /usr/share/x es C:\BrysOS\Linux\usr\share\x); /dev/null, /dev/urandom y
+// /etc/resolv.conf son virtuales.
 #include "proc/linux.h"
 #include "proc/process.h"
 #include "proc/sched.h"
@@ -15,6 +16,7 @@
 #include "net/stack.h"
 #include "net/diag.h"
 #include "proc/syscall.h"
+#include "lib/random.h"
 #include "kernel.h"
 
 extern "C" void linux_syscall_entry();
@@ -74,18 +76,6 @@ int64_t err(int e) { return -(int64_t)e; }
 
 State* st() { return process::current()->lx; }
 
-uint64_t rng_state;
-uint64_t rnd() {
-    if (!rng_state) {
-        uint32_t lo, hi;
-        asm volatile("rdtsc" : "=a"(lo), "=d"(hi));
-        rng_state = (((uint64_t)hi << 32) | lo) ^ 0x9E3779B97F4A7C15ull ^ pit::ticks();
-    }
-    rng_state ^= rng_state << 13;
-    rng_state ^= rng_state >> 7;
-    rng_state ^= rng_state << 17;
-    return rng_state;
-}
 
 // --- Tiempo: segundos desde 1970 (UTC)
 int64_t days_from_civil(int y, int m, int d) {
@@ -380,7 +370,7 @@ int64_t do_read(Fd* f, uint8_t* buf, uint64_t n) {
     case Fd::NUL: return 0;
     case Fd::ZERO: memset(buf, 0, n); return (int64_t)n;
     case Fd::RANDOM:
-        for (uint64_t i = 0; i < n; i++) buf[i] = (uint8_t)(rnd() >> 24);
+        random::bytes(buf, n);
         return (int64_t)n;
     case Fd::FILE: case Fd::MEMFILE: {
         if (!f->readable) return err(EBADF);
@@ -917,8 +907,7 @@ int64_t sys(uint64_t n, uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t
     case 273: case 334: return 0;                                         // set_robust_list, rseq
     case 318: {                                                           // getrandom
         if (!uok(a, b, true)) return err(EFAULT);
-        uint8_t* buf = (uint8_t*)a;
-        for (uint64_t i = 0; i < b; i++) buf[i] = (uint8_t)(rnd() >> 24);
+        random::bytes((void*)a, b);
         return (int64_t)b;
     }
     case 332: return err(ENOSYS);                                         // statx: musl usa fstatat
@@ -1099,7 +1088,7 @@ bool build_stack(Process* p, uint64_t& sp) {
     for (auto& s : argv) argp.push(push_bytes(s.c_str(), s.size() + 1));
     for (auto& s : envp) envpp.push(push_bytes(s.c_str(), s.size() + 1));
     uint8_t rnd16[16];
-    for (auto& b : rnd16) b = (uint8_t)(rnd() >> 24);
+    random::bytes(rnd16, sizeof rnd16);
     uint64_t at_random = push_bytes(rnd16, 16);
     uint64_t at_execfn = argp[0];
     top &= ~15ull;
@@ -1152,7 +1141,9 @@ bool to_brys_path(const char* lp, const char* cwd, char* out, uint64_t cap) {
     } else if (first.empty()) {
         b = "C:\\";
     } else {
-        b = String("C:\\") + (norm.c_str() + 1);   // /usr/share/x -> C:\usr\share\x
+        // /etc, /usr... viven en C:\BrysOS\Linux (protegida: los programas no la pueden
+        // modificar, sólo el Actualizador): /usr/share/x -> C:\BrysOS\Linux\usr\share\x
+        b = String("C:\\BrysOS\\Linux\\") + (norm.c_str() + 1);
     }
     for (size_t i = 0; i < b.size(); i++)
         if (b[i] == '/') b[i] = '\\';

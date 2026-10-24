@@ -7,6 +7,7 @@
 #include "proc/process.h"
 #include "proc/syscall.h"
 #include "proc/linux.h"
+#include "lib/random.h"
 
 namespace {
 
@@ -74,6 +75,7 @@ extern "C" Frame* isr_dispatch(Frame* f) {
     }
     if (f->vector >= 32 && f->vector < 48) {
         int irq = (int)f->vector - 32;
+        random::add_entropy(((uint64_t)irq << 56) ^ f->rip);   // el instante (TSC) de cada interrupción
         // IRQ espurias del PIC
         if (irq == 7) { outb(0x20, 0x0B); if (!(inb(0x20) & 0x80)) return f; }
         if (irq == 15) { outb(0xA0, 0x0B); if (!(inb(0xA0) & 0x80)) { outb(0x20, 0x20); return f; } }

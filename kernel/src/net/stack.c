@@ -45,10 +45,9 @@ void* brys_lwip_calloc(size_t n, size_t size) {
     return p;
 }
 uint32_t brys_lwip_rand(void) {
-    static uint64_t s;
-    if (!s) s = brys_ns() | 1;
-    s ^= s << 13; s ^= s >> 7; s ^= s << 17;
-    return (uint32_t)s;
+    uint32_t v;
+    brys_random(&v, sizeof v);
+    return v;
 }
 void brys_lwip_diag(const char* fmt, ...) {
     char buf[256] = "lwip: ";

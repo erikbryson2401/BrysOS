@@ -8,6 +8,7 @@
 #include "lib/string.h"
 #include "mm/memory.h"
 #include "proc/sched.h"
+#include "lib/random.h"
 
 extern "C" {
 
@@ -176,6 +177,8 @@ uint32_t brys_pci_bar_io(int index, int bar, uint32_t* size) {
     if (size) *size = mask ? ((~mask + 1) & 0xFFFF) : 0;
     return v & ~3u;
 }
+
+void brys_random(void* out, size_t n) { random::bytes(out, n); }
 
 void* brys_read_file(const char* path, size_t* size) {
     uint8_t* data;

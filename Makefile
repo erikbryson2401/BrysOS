@@ -49,7 +49,7 @@ RUN_LIB    := build/run/obj/sdk/crt0.o build/run/obj/sdk/librun.o
 # compatibilidad de kernel/src/linux/include, que imitan las del núcleo Linux.
 LINUX_CFLAGS := $(filter-out -std=gnu++20 -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit \
 	-Ikernel/src,$(CXXFLAGS)) -std=gnu11 -Ikernel/src/linux/include -Ikernel/src/linux -include linux/kconfig.h -D__KERNEL__ \
-	-fno-common -Wno-sign-compare -Wno-missing-field-initializers -Wno-unused-function -Wno-pointer-sign
+	-fno-common -Wno-sign-compare -Wno-missing-field-initializers -Wno-unused-function -Wno-pointer-sign -Wno-unused-const-variable
 CSRC := $(sort $(shell find kernel/src -name '*.c'))
 
 FONT_SRC := kernel/src/gfx/font_data.cpp

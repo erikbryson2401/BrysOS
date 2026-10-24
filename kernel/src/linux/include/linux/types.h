@@ -10,11 +10,11 @@
 typedef uint8_t u8, __u8;
 typedef uint16_t u16, __u16;
 typedef uint32_t u32, __u32;
-typedef uint64_t u64, __u64;
+typedef unsigned long long u64, __u64;
 typedef int8_t s8, __s8;
 typedef int16_t s16, __s16;
 typedef int32_t s32, __s32;
-typedef int64_t s64, __s64;
+typedef long long s64, __s64;
 
 typedef u16 __le16, __be16;
 typedef u32 __le32, __be32;
