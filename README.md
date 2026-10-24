@@ -7,6 +7,13 @@ aspecto de Windows 98 SE, en español o en inglés. Se arranca desde un pendrive
 una máquina virtual), se instala en el disco y arranca con **GRUB**, que permite elegir entre
 BrysOS y los demás sistemas del equipo.
 
+> 🤖 **Un benchmark para IA: sistema creado por Claude.** BrysOS es un experimento para ver
+> hasta dónde llega una IA escribiendo un sistema operativo de verdad, desde cero y sobre
+> hardware real. Casi todo el código lo ha escrito **Claude** (Anthropic), con
+> **erikbryson2401** como director del proyecto: él decide qué se hace, lo prueba en un HP
+> Pavilion dv5 de 2009 y trae de vuelta los fallos, los registros y las fotos de pantalla.
+> Por eso los commits llevan a los dos como coautores.
+
 **Descargas:** la ISO y los paquetes de actualización de cada versión están en
 [Releases](https://github.com/erikbryson2401/BrysOS/releases). Lo que cambia en cada una, en
 [CHANGELOG.md](CHANGELOG.md). Equipo de referencia: un HP Pavilion dv5 (Core 2 Duo T6400).
