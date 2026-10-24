@@ -1,4 +1,4 @@
-Novedades de BrysOS 1.2:
+Novedades de BrysOS 0.3 alpha (antes 1.2):
 - Programas .run (como los .exe): se ejecutan aparte del sistema; si uno
   falla o se cuelga, el resto sigue. Ctrl+Alt+Supr abre "Cerrar programa".
   Incluye dos de ejemplo en Inicio > Programas: Hola y Serpiente.

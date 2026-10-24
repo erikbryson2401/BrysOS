@@ -1,4 +1,4 @@
-Novedades de BrysOS 1.1.1:
+Novedades de BrysOS 0.2.1 alpha (antes 1.1.1):
 - Sonido en el HP Pavilion dv5: se activan los altavoces internos
   (la BIOS los marca como desconectados) y su amplificador (GPIO0).
 - Orden SONIDO: prueba el sonido y guarda un informe del códec.

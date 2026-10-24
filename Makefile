@@ -1,8 +1,8 @@
 # BrysOS - sistema de compilación (ejecutar dentro de WSL)
 .SUFFIXES:
 
-# Versión del sistema: make VERSION=1.1 (también la usa el paquete de actualización)
-VERSION  ?= 1.3-alfa2
+# Versión del sistema: make VERSION=0.6-alpha; las de prueba son x.y-alpha, la final 1.0 (también la usa el paquete de actualización)
+VERSION  ?= 0.6-alpha
 ISO      := BrysOS.iso
 KERNEL   := build/kernel.elf
 # Prefijo del compilador cruzado: vacío en Linux (g++ del sistema); en Windows (MSYS2),
@@ -234,17 +234,17 @@ $(ISO): $(KERNEL) $(BSL_FILES) limine.conf $(LIMINE) $(GRUB_FILES)
 		build/iso_root -o $(ISO) 2>/dev/null
 	./$(LIMINE) bios-install $(ISO) 2>/dev/null
 
-# Paquete de actualización con el núcleo actual: make bsi VERSION=1.1
+# Paquete de actualización con el núcleo actual: make bsi VERSION=0.6-alpha
 # Las notas de la versión (si existe el archivo) se muestran en el Actualizador.
 # Cada versión publicada se guarda en iso/ y bsi/ (make release VERSION=x.y)
 BSI       := bsi/BrysOS-$(VERSION).bsi
 BSI_NOTES ?= notas-$(VERSION).txt
 BSI_EXTRA ?=
-# BSI_LIBS=0: sólo el núcleo (para actualizar desde la 1.0, cuyo actualizador estropea los
+# BSI_LIBS=0: sólo el núcleo (para actualizar desde la 0.1 alpha (antes 1.0), cuyo actualizador estropea los
 # archivos si el paquete trae varios; el núcleo nuevo instala solo sus bibliotecas).
-# Con las bibliotecas, el paquete exige la 1.1 o posterior.
+# Con las bibliotecas, el paquete exige la 0.2 alpha (antes 1.1) o posterior.
 BSI_LIBS  ?= 1
-BSI_CONTENT := build/kernel-bsi.elf:kernel.elf $(if $(filter 1,$(BSI_LIBS)),$(foreach n,$(BSL_NAMES),build/bsl/$(n).bsl:bsl/$(n).bsl) --min-version 1.1)
+BSI_CONTENT := build/kernel-bsi.elf:kernel.elf $(if $(filter 1,$(BSI_LIBS)),$(foreach n,$(BSL_NAMES),build/bsl/$(n).bsl:bsl/$(n).bsl) --min-version 0.2)
 bsi: $(BSI)
 $(BSI): $(KERNEL) $(BSL_FILES) tools/mkbsi.py FORCE
 	@mkdir -p bsi
