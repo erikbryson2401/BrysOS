@@ -353,6 +353,12 @@ int64_t sys(Process* p, uint64_t n, uint64_t a, uint64_t b, uint64_t c, uint64_t
 }
 }
 
+int64_t syscall::call(uint64_t n, uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e) {
+    Process* p = process::current();
+    if (!p || n >= SYS_NUM) return -1;
+    return sys(p, n, a, b, c, d, e);
+}
+
 void syscall::dispatch(Frame* f) {
     Process* p = process::current();
     if (!p) { f->rax = (uint64_t)-1; return; }

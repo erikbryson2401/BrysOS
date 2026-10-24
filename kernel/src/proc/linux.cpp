@@ -14,6 +14,7 @@
 #include "mm/memory.h"
 #include "net/stack.h"
 #include "net/diag.h"
+#include "proc/syscall.h"
 #include "kernel.h"
 
 extern "C" void linux_syscall_entry();
@@ -1121,7 +1122,14 @@ bool build_stack(Process* p, uint64_t& sp) {
 
 void dispatch(Frame* f) {
     if (!process::current() || !process::current()->lx) { f->rax = (uint64_t)-ENOSYS; return; }
-    f->rax = (uint64_t)sys(f->rax, f->rdi, f->rsi, f->rdx, f->r10, f->r8, f->r9);
+    // como las de los .run: la llamada puede tardar (disco, red), así que el reloj y los
+    // dispositivos siguen funcionando mientras tanto
+    sti();
+    uint64_t n = f->rax;
+    int64_t r = n >= 0x4000 ? syscall::call(n - 0x4000, f->rdi, f->rsi, f->rdx, f->r10, f->r8)   // GUI de BrysOS
+                            : sys(n, f->rdi, f->rsi, f->rdx, f->r10, f->r8, f->r9);
+    cli();
+    f->rax = (uint64_t)r;
 }
 
 bool to_brys_path(const char* lp, const char* cwd, char* out, uint64_t cap) {
