@@ -24,6 +24,8 @@ BrysOS y los demás sistemas del equipo.
 | Asistente de instalación | Explorador / Mi PC |
 | ![Serpiente](docs/capturas/serpiente.png) | ![Créditos y licencias](docs/capturas/creditos.png) |
 | Serpiente, un programa `.run` en modo usuario | Créditos y licencias |
+| ![Internet](docs/capturas/navegador.png) | ![Búsqueda](docs/capturas/busqueda.png) |
+| Internet: NetSurf, un programa de Linux, en la Wikipedia | Búsqueda en DuckDuckGo |
 
 ## Qué incluye
 
@@ -92,9 +94,38 @@ Programas (`C:\Archivos de programa`).
 El SDK está en `sdk/` (cabecera `brysos.h`, biblioteca y guía en `sdk/README.md`); cada
 carpeta de `programas/` se compila como un `.run` que va dentro del sistema.
 
+## Internet (NetSurf)
+
+El icono **Internet** del escritorio (o Inicio > Programas > NetSurf) abre
+[NetSurf 3.11](https://www.netsurf-browser.org/), un navegador de verdad (HTML, CSS, imágenes
+PNG/JPEG/GIF/SVG, HTTPS) compilado **para Linux** y ejecutado tal cual por BrysOS:
+
+- Es un programa de Linux estático con [musl](https://musl.libc.org/); lo descarga
+  [curl](https://curl.se/) con [Mbed TLS](https://www.trustedfirmware.org/projects/mbed-tls/)
+  y los certificados raíz de Mozilla (`C:\BrysOS\Linux\etc\ssl\cert.pem`).
+- Dibuja en una ventana de BrysOS con una superficie propia de `libnsfb`
+  (`tools/ports/netsurf/brysos.c`) y recibe el teclado con la distribución del sistema (ñ y
+  tildes) y la rueda del ratón.
+- Página de inicio: DuckDuckGo en HTML (busca sin JavaScript). Para ir a una dirección, clic
+  en la barra, **Ctrl+U** borra lo escrito.
+- Sin JavaScript (NetSurf apenas lo soporta), sin pestañas y, por ahora, sin descargas.
+
+Cómo se compila: [tools/ports/README.md](tools/ports/README.md).
+
+## Programas de Linux
+
+BrysOS ejecuta **programas de Linux x86-64 estáticos** (compilados con musl) junto a los `.run`:
+un archivo `.run` puede ser un ELF de Linux y el sistema lo reconoce solo. La capa
+`kernel/src/proc/linux.cpp` traduce unas 80 llamadas de Linux (archivos, memoria, tiempo,
+sockets TCP/UDP, `poll`, tuberías, `eventfd`, señales básicas) a BrysOS. Las rutas de Linux
+`/c/...` son `C:\...`, `/tmp` es `C:\Temp` y el resto (`/etc`, `/usr`) vive en
+`C:\BrysOS\Linux`. Con `sdk/include/brysos_linux.h` un programa de Linux puede crear ventanas
+de BrysOS (llamadas `0x4000 + n`). Un solo hilo por programa, por ahora.
+
 ## Créditos y licencias
 
-BrysOS incluye componentes de otros proyectos (Limine, GRUB, las fuentes DejaVu, minimp3).
+BrysOS incluye componentes de otros proyectos (Limine, GRUB, las fuentes DejaVu, minimp3,
+drivers de Linux, lwIP, NetSurf, musl, curl, Mbed TLS, zlib, libpng, libjpeg, Expat).
 En el primer arranque del sistema instalado aparece la ventana **Créditos y licencias** con sus
 autores y licencias; se cierra con Aceptar y vuelve a salir en cada arranque hasta marcar "No
 volver a mostrar" (`OcultarCreditos` en `config.ini`). También se abre desde Inicio > Ayuda o
@@ -241,6 +272,8 @@ Reglas:
 
 La máquina **BrysOS98** ya está creada: SATA (AHCI), ratón y teclado PS/2, sonido HD Audio.
 Con *tableta USB* el puntero no funciona (no es un ratón en modo de arranque).
+Para Internet, la red de la máquina debe ser **NAT** con el adaptador **Intel PRO/1000 MT
+Desktop** (el que VirtualBox pone por defecto), y conviene darle al menos 1 GB de memoria.
 
 ## Limitaciones conocidas
 
@@ -252,7 +285,8 @@ Con *tableta USB* el puntero no funciona (no es un ratón en modo de arranque).
   ACPI (SCI): las teclas Fn de brillo las atiende la BIOS si lo hace en modo heredado.
 - `Load` (tablas cargadas en tiempo de ejecución, gestión de energía del procesador) no está
   implementado.
-- Sin red ni lector de CD/DVD. Las demás particiones FAT32 se montan en sólo lectura.
+- Red sólo por cable con tarjetas Intel PRO/1000 (QEMU, VirtualBox); la WiFi del dv5 está en
+  camino. Sin lector de CD/DVD. Las demás particiones FAT32 se montan en sólo lectura.
 - Las aplicaciones del sistema se ejecutan en el núcleo con multitarea cooperativa; los
   programas `.run`, aparte y con multitarea apropiativa.
 - El horario de verano no se aplica automáticamente.
@@ -260,6 +294,10 @@ Con *tableta USB* el puntero no funciona (no es un ratón en modo de arranque).
   el portátil real.
 
 ## Pruebas
+
+Internet: `test_net.sh` (DHCP, DNS y ping), `test_linux.sh` (programas de Linux: archivos, HTTP
+y ventanas) y `test_netsurf.sh` (el navegador: DuckDuckGo, una búsqueda con ñ, la Wikipedia y
+la rueda del ratón).
 
 `tools/` contiene scripts para QEMU: `test_install.sh` (instalación BIOS), `test_uefi_install.sh`,
 `make_dualboot_disk.sh` (disco con NTFS y ext4), `test_usb.sh`, `test_firstboot.sh` (logo y

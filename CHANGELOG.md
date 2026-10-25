@@ -9,9 +9,28 @@ dentro de cada ISO antigua, `VER` sigue mostrando el número con el que se compi
 
 ## 1.0 — en desarrollo
 
-- Red: TCP/IP, DHCP y DNS; WiFi del HP dv5 con drivers de Linux.
-- Navegador (NetSurf) con HTTPS y descargas.
+- WiFi del HP dv5 con drivers de Linux (b43 y mac80211).
+- Descargas en el navegador.
 - Vídeo con FFmpeg y YouTube a través de Invidious.
+
+## 0.7 alpha — 25/10/2026
+
+El navegador.
+
+- **Internet**: [NetSurf 3.11](https://www.netsurf-browser.org/) en el escritorio y en Inicio >
+  Programas. HTML, CSS, imágenes PNG, JPEG, GIF y SVG, **HTTPS** con curl y Mbed TLS y los
+  certificados raíz de Mozilla. Página de inicio: DuckDuckGo (versión HTML).
+- **Programas de Linux**: BrysOS ejecuta programas de Linux x86-64 estáticos (musl): archivos,
+  memoria, tiempo, sockets TCP/UDP, `poll`, tuberías, `eventfd`, aleatorios. NetSurf y curl
+  son programas de Linux sin cambios en su núcleo; sólo se les ha escrito la parte que dibuja
+  en una ventana de BrysOS.
+- Los programas de Linux pueden abrir **ventanas de BrysOS** (`sdk/include/brysos_linux.h`),
+  con la nueva **rueda del ratón** en los lienzos (`EV_RUEDA`).
+- **Aleatorios para criptografía**: entropía de los tiempos de las interrupciones y ChaCha20.
+- El núcleo lleva dentro el navegador y sus recursos, y los escribe en el disco al instalarse
+  o actualizarse (`C:\Archivos de programa\NetSurf.run`, `C:\BrysOS\Linux`).
+- Créditos y licencias: NetSurf y sus bibliotecas, musl, curl, Mbed TLS, zlib, libpng, libjpeg,
+  Expat y los certificados de Mozilla.
 
 ## 0.6 alpha — 24/10/2026
 

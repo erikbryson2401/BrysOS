@@ -7,8 +7,25 @@ GCCINC=$(x86_64-elf-gcc -print-file-name=include)
 # los programas son "de Linux": se definen las macros que pone el GCC de Linux
 LNX="-D__linux__=1 -D__linux=1 -Dlinux=1 -D__gnu_linux__=1 -D__unix__=1 -D__unix=1 -Dunix=1"
 link=1
-for a in "$@"; do case "$a" in -c|-S|-E|-M|-MM) link=0;; esac; done
+for a in "$@"; do case "$a" in -c|-S|-E|-M|-MM|-dumpspecs|-dumpmachine|-dumpversion|--version|-print-*) link=0;; esac; done
 if [ $link = 1 ]; then
+  # Windows limita la línea de órdenes a 32 KB: con muchos objetos se pasan en un archivo de respuesta
+  if [ $# -gt 100 ]; then
+    # (en el archivo MSYS no convierte las rutas: se convierten aquí con cygpath)
+    rsp=.musl-gcc.$$.rsp
+    for a in "$@"; do
+      case "$a" in
+        /*) a=$(cygpath -m "$a") ;;
+        -L/*|-I/*) a=${a%%/*}$(cygpath -m "/${a#*/}") ;;
+      esac
+      printf '"%s"\n' "$(printf '%s' "$a" | sed 's/[\\"]/\\&/g')"
+    done > "$rsp"
+    x86_64-elf-gcc $LNX -Wa,--noexecstack -static -no-pie -nostdinc -isystem "$M/include" -isystem "$SYS/include" -isystem "$GCCINC" -nostdlib \
+      "$M/lib/crt1.o" "$M/lib/crti.o" @"$rsp" -L"$SYS/lib" -L"$M/lib" -Wl,--start-group -lc -lgcc -Wl,--end-group "$M/lib/crtn.o"
+    r=$?
+    rm -f "$rsp"
+    exit $r
+  fi
   exec x86_64-elf-gcc $LNX -Wa,--noexecstack -static -no-pie -nostdinc -isystem "$M/include" -isystem "$SYS/include" -isystem "$GCCINC" -nostdlib \
     "$M/lib/crt1.o" "$M/lib/crti.o" "$@" -L"$SYS/lib" -L"$M/lib" -Wl,--start-group -lc -lgcc -Wl,--end-group "$M/lib/crtn.o"
 else

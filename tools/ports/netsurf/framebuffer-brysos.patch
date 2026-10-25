@@ -1,0 +1,71 @@
+diff -ru a/netsurf/frontends/framebuffer/fbtk/event.c b/netsurf/frontends/framebuffer/fbtk/event.c
+--- a/netsurf/frontends/framebuffer/fbtk/event.c	2026-10-24 22:25:55.728538400 -0300
++++ b/netsurf/frontends/framebuffer/fbtk/event.c	2026-10-24 22:25:55.776440800 -0300
+@@ -302,6 +302,10 @@
+ {
+ 	int ucs4 = -1;
+ 
++	/* BrysOS: carácter ya traducido por el sistema (distribución de teclado del usuario) */
++	if (code >= 0x10000 && code < 0x10100)
++		return code - 0x10000;
++
+ 	if (mods & FBTK_MOD_LSHIFT || mods & FBTK_MOD_RSHIFT) {
+ 		if ((code >= 0) && (code < (int) NOF_ELEMENTS(sh_keymap)))
+ 			ucs4 = sh_keymap[code];
+diff -ru a/netsurf/frontends/framebuffer/fbtk/text.c b/netsurf/frontends/framebuffer/fbtk/text.c
+--- a/netsurf/frontends/framebuffer/fbtk/text.c	2026-10-24 22:25:55.728538400 -0300
++++ b/netsurf/frontends/framebuffer/fbtk/text.c	2026-10-24 22:25:55.776440800 -0300
+@@ -442,20 +442,36 @@
+ 			break;
+ 		}
+ 
++		{
++		/* BrysOS: ignora las teclas sin carácter y guarda en UTF-8 */
++		int ucs4 = fbtk_keycode_to_ucs4(value, modifier);
++		char utf8[2];
++		int n = 1;
++		if (ucs4 < 32 || ucs4 > 0xFF || ucs4 == 127) {
++			break;
++		}
++		if (ucs4 < 0x80) {
++			utf8[0] = ucs4;
++		} else {
++			utf8[0] = 0xC0 | (ucs4 >> 6);
++			utf8[1] = 0x80 | (ucs4 & 0x3F);
++			n = 2;
++		}
++
+ 		/* allow for new character and null */
+-		temp = realloc(widget->u.text.text, widget->u.text.len + 2);
++		temp = realloc(widget->u.text.text, widget->u.text.len + n + 1);
+ 		if (temp == NULL) {
+ 			break;
+ 		}
+ 
+ 		widget->u.text.text = temp;
+-		memmove(widget->u.text.text + widget->u.text.idx + 1,
++		memmove(widget->u.text.text + widget->u.text.idx + n,
+ 				widget->u.text.text + widget->u.text.idx,
+ 				widget->u.text.len - widget->u.text.idx);
+-		widget->u.text.text[widget->u.text.idx] =
+-				fbtk_keycode_to_ucs4(value, modifier);
+-		widget->u.text.idx++;
+-		widget->u.text.len++;
++		memcpy(widget->u.text.text + widget->u.text.idx, utf8, n);
++		widget->u.text.idx += n;
++		widget->u.text.len += n;
++		}
+ 		widget->u.text.text[widget->u.text.len] = '\0';
+ 
+ 		fb_font_width(&font_style, widget->u.text.text,
+diff -ru a/netsurf/frontends/framebuffer/gui.c b/netsurf/frontends/framebuffer/gui.c
+--- a/netsurf/frontends/framebuffer/gui.c	2026-10-24 22:25:55.728538400 -0300
++++ b/netsurf/frontends/framebuffer/gui.c	2026-10-24 22:25:55.760506100 -0300
+@@ -470,6 +470,7 @@
+ {
+ 	if (type < fetype) {
+ 		fename = name;
++		fetype = type;
+ 	}
+ }
+ 

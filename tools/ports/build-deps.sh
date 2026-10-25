@@ -58,7 +58,14 @@ libjpeg() {
     make $J >>../libjpeg.log 2>&1 && make install >>../libjpeg.log 2>&1
 }
 
-for p in ${*:-zlib mbedtls curl_ libpng libjpeg}; do
+expat() {
+    unpack expat-2.7.3.tar.xz expat-2.7.3
+    ./configure --host=$HOST --prefix="$SYS" --disable-shared --without-docbook --without-examples \
+        --without-tests --without-xmlwf >../expat.log 2>&1
+    make $J >>../expat.log 2>&1 && make install >>../expat.log 2>&1
+}
+
+for p in ${*:-zlib mbedtls curl_ libpng libjpeg expat}; do
     log "$p"
     ( $p ) || { echo "Error: $p (mire $SRC/${p%_}.log)"; exit 1; }
 done

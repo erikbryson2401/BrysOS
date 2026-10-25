@@ -1,0 +1,12 @@
+Novedades de BrysOS 0.7 alpha (versión de prueba):
+- Internet: el icono Internet del escritorio abre NetSurf, un navegador
+  de verdad (HTTPS, imágenes, la Wikipedia, DuckDuckGo). Necesita red por
+  cable con una tarjeta Intel PRO/1000 (QEMU o VirtualBox en NAT); en el
+  HP dv5 la WiFi todavía no funciona.
+- BrysOS ejecuta programas de Linux (compilados con musl): NetSurf y curl
+  lo son.
+- Para escribir una dirección: clic en la barra, Ctrl+U la borra, Intro.
+  La rueda del ratón desplaza la página.
+- Si algo falla, la orden RED del Símbolo del sistema guarda el registro
+  en el pendrive (RED\registro.txt): sus líneas "Linux:" y "Programa:"
+  ayudan a encontrar el problema.

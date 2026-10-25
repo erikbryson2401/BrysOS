@@ -2,7 +2,7 @@
 .SUFFIXES:
 
 # Versión del sistema: make VERSION=0.6-alpha; las de prueba son x.y-alpha, la final 1.0 (también la usa el paquete de actualización)
-VERSION  ?= 0.6-alpha
+VERSION  ?= 0.7-alpha
 ISO      := BrysOS.iso
 KERNEL   := build/kernel.elf
 # Prefijo del compilador cruzado: vacío en Linux (g++ del sistema); en Windows (MSYS2),
@@ -116,6 +116,21 @@ build/gen/run_embed.asm: $(RUN_FILES) tools/genembed.py
 build/gen/run_embed.o: build/gen/run_embed.asm
 	$(NASM) -f elf64 $< -o $@
 
+# Archivos que no se compilan aquí (NetSurf, sus recursos, los certificados raíz...): un árbol
+# que reproduce C:\ y que tools/ports/build-netsurf.sh deja en BUNDLE. El núcleo los escribe
+# en el disco al instalarse. Sin la carpeta, BrysOS se compila igual, sin ellos.
+BUNDLE ?= /e/BrysOS-dev/bundle
+build/gen/files_embed.lst: FORCE
+	@mkdir -p $(dir $@)
+	@(cd "$(BUNDLE)" 2>/dev/null && find . -type f -printf '%T@ %s %p\n' | sort) > $@.tmp || true
+	@cmp -s $@.tmp $@ || mv $@.tmp $@; rm -f $@.tmp
+
+build/gen/files_embed.asm: build/gen/files_embed.lst tools/genembed.py
+	python3 tools/genembed.py --symbol files_embedded --tree "$(BUNDLE)" > $@
+
+build/gen/files_embed.o: build/gen/files_embed.asm
+	$(NASM) -f elf64 $< -o $@
+
 # Las fuentes y los iconos generados están en el repositorio: sólo se regeneran a petición
 # (make fuentes / make iconos), porque git no conserva las fechas de los archivos y las
 # fuentes DejaVu no siempre están instaladas.
@@ -190,16 +205,16 @@ build/gen/bsl_exports_stub.o: tools/genexports.py
 	python3 tools/genexports.py --stub > build/gen/bsl_exports_stub.S
 	$(CXX) -c build/gen/bsl_exports_stub.S -o $@
 
-build/kernel-stage1.elf: $(OBJ) build/gen/bsl_embed.o build/gen/run_embed.o build/gen/lic_embed.o build/gen/bsl_exports_stub.o kernel/linker.ld
-	$(LD) $(LDFLAGS) $(OBJ) build/gen/bsl_embed.o build/gen/run_embed.o build/gen/lic_embed.o build/gen/bsl_exports_stub.o -o $@
+build/kernel-stage1.elf: $(OBJ) build/gen/bsl_embed.o build/gen/run_embed.o build/gen/files_embed.o build/gen/lic_embed.o build/gen/bsl_exports_stub.o kernel/linker.ld
+	$(LD) $(LDFLAGS) $(OBJ) build/gen/bsl_embed.o build/gen/run_embed.o build/gen/files_embed.o build/gen/lic_embed.o build/gen/bsl_exports_stub.o -o $@
 
 build/gen/bsl_exports.o: build/kernel-stage1.elf tools/genexports.py
 	$(NM) -g --defined-only $< | python3 tools/genexports.py > build/gen/bsl_exports.S
 	$(CXX) -c build/gen/bsl_exports.S -o $@
 
-$(KERNEL): $(OBJ) build/gen/bsl_embed.o build/gen/run_embed.o build/gen/lic_embed.o build/gen/bsl_exports.o kernel/linker.ld
+$(KERNEL): $(OBJ) build/gen/bsl_embed.o build/gen/run_embed.o build/gen/files_embed.o build/gen/lic_embed.o build/gen/bsl_exports.o kernel/linker.ld
 	@mkdir -p $(dir $@)
-	$(LD) $(LDFLAGS) $(OBJ) build/gen/bsl_embed.o build/gen/run_embed.o build/gen/lic_embed.o build/gen/bsl_exports.o -o $@
+	$(LD) $(LDFLAGS) $(OBJ) build/gen/bsl_embed.o build/gen/run_embed.o build/gen/files_embed.o build/gen/lic_embed.o build/gen/bsl_exports.o -o $@
 
 limine/limine:
 	$(MAKE) -C limine

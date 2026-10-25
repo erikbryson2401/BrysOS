@@ -94,7 +94,8 @@ time.sleep(wait)
 n = 0
 if not any(a.startswith("shot:") for a in args):
     args.append("shot:shot")
-KEYMAP = {" ": "spc", ".": "dot", ",": "comma", "-": "slash", "\n": "ret", "\\": "grave_accent"}
+KEYMAP = {" ": "spc", ".": "dot", ",": "comma", "-": "slash", "\n": "ret", "\\": "grave_accent",
+          "ñ": "semicolon", "_": "shift-slash"}
 
 def type_text(t):
     # Distribución española en el sistema invitado: \ = AltGr+º (tecla grave_accent)
@@ -111,6 +112,11 @@ def type_text(t):
             mon("sendkey shift-bracket_right")
         elif ch == "/":
             mon("sendkey shift-7")
+        elif ch == "Ñ":
+            mon("sendkey shift-semicolon")
+        elif ch in "áéíóú":   # tilde: tecla muerta (la de la derecha de la Ñ) y la vocal
+            mon("sendkey apostrophe")
+            mon(f"sendkey {'aeiou'['áéíóú'.index(ch)]}")
         elif ch.isupper():
             mon(f"sendkey shift-{ch.lower()}")
         else:
@@ -150,8 +156,12 @@ def click(x, y, btn=1, double=False):
     time.sleep(0.3)
 
 for a in args:
-    if a.startswith("click:") or a.startswith("dclick:") or a.startswith("rclick:") or a.startswith("move:"):
+    if a.startswith("click:") or a.startswith("dclick:") or a.startswith("rclick:") or a.startswith("move:") \
+            or a.startswith("hclick:"):
         kind, xy = a.split(":", 1)
+        if kind == "hclick":   # vuelve antes a la esquina: el puntero del invitado puede desviarse
+            pos[:] = [None, None]
+            kind = "click"
         x, y = map(int, xy.split(","))
         if kind == "move":
             move_to(x, y)

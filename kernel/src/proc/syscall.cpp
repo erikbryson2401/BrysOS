@@ -74,6 +74,9 @@ public:
     void on_mouse_move(const MouseEv& e) override {
         if (in_canvas(e)) event(EV_RATON_MOVER, 0, e.x - canvas_rect.x, e.y - canvas_rect.y, e.buttons);
     }
+    void on_mouse_wheel(const MouseEv& e) override {
+        if (in_canvas(e)) event(EV_RUEDA, 0, e.x - canvas_rect.x, e.y - canvas_rect.y, e.buttons, e.wheel);
+    }
     void on_timer(int) override { event(EV_TEMPORIZADOR); }
 
     bool on_close() override {

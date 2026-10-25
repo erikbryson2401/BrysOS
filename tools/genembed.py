@@ -9,7 +9,17 @@ args = sys.argv[1:]
 sym = "bsl_embedded"
 if args[:1] == ["--symbol"]:   # otro nombre de tabla (p. ej. run_embedded para los programas)
     sym, args = args[1], args[2:]
-files = args
+names = None
+if args[:1] == ["--tree"]:     # todos los archivos de una carpeta, con su ruta relativa (a C:\)
+    root = args[1]
+    files, names = [], []
+    for d, subdirs, fs in os.walk(root):
+        subdirs.sort()
+        for n in sorted(fs):
+            files.append(os.path.join(d, n).replace("\\", "/"))
+            names.append(os.path.relpath(os.path.join(d, n), root).replace("/", "\\"))
+else:
+    files = args
 print("; Generado por tools/genembed.py")
 print("section .rodata")
 print(f"global {sym}")
@@ -21,7 +31,7 @@ for i, f in enumerate(files):
 print(f"{sym}_count:")
 print(f"    dq {len(files)}")
 for i, f in enumerate(files):
-    print(f'name{i}: db "{os.path.basename(f)}", 0')
+    print(f'name{i}: db "{names[i] if names else os.path.basename(f)}", 0')
 for i, f in enumerate(files):
     print("align 16")
     print(f"data{i}:")

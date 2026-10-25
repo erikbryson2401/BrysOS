@@ -1,0 +1,17 @@
+homepage_url:https://html.duckduckgo.com/html/
+ca_bundle:/etc/ssl/cert.pem
+cookie_file:/tmp/NetSurf-Cookies
+cookie_jar:/tmp/NetSurf-Cookies
+accept_language:es, en
+window_width:960
+window_height:640
+max_fetchers:8
+max_fetchers_per_host:4
+memory_cache_size:16777216
+enable_javascript:0
+sys_colour_ButtonFace:c0c0c0
+sys_colour_Menu:c0c0c0
+sys_colour_ActiveCaption:000080
+sys_colour_CaptionText:ffffff
+sys_colour_Highlight:000080
+sys_colour_HighlightText:ffffff

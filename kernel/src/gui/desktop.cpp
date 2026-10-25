@@ -35,6 +35,8 @@ Taskbar* the_taskbar = nullptr;
 // ---------------------------------------------------------------------------
 // Escritorio
 // ---------------------------------------------------------------------------
+constexpr const char* NETSURF_PATH = "C:\\Archivos de programa\\NetSurf.run";
+
 Desktop::Desktop() : Window(T("Escritorio"), 10, 10, WF_DESKTOP | WF_NOBORDER | WF_NO_TASKBAR) {
     frame = {0, 0, wm::screen_w(), wm::screen_h()};
     the_desktop = this;
@@ -46,6 +48,8 @@ void Desktop::rebuild() {
     if (live_mode()) add_icon(T("Instalar BrysOS"), &icon_logo, "::install");
     add_icon(T("Mi PC"), &icon_computer, "::mipc");
     add_icon(T("Mis documentos"), &icon_mydocs, "::docs");
+    // el navegador (NetSurf, programa de Linux), si está instalado
+    if (vfs::exists(NETSURF_PATH)) add_icon(T("Internet"), &icon_internet, NETSURF_PATH);
     add_icon(T("Papelera de reciclaje"), &icon_recycle, "::trash");
     add_icon(T("Bloc de notas"), &icon_notepad, "::notepad");
     add_icon(T("Símbolo del sistema"), &icon_cmd, "::cmd");

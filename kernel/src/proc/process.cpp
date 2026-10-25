@@ -19,6 +19,9 @@ struct EmbeddedRun {
 };
 extern "C" const EmbeddedRun run_embedded[];
 extern "C" const uint64_t run_embedded_count;
+// otros archivos incluidos (NetSurf y sus recursos...), con su ruta relativa a C:\ (Makefile: BUNDLE)
+extern "C" const EmbeddedRun files_embedded[];
+extern "C" const uint64_t files_embedded_count;
 
 namespace {
 constexpr uint64_t ADDR = 0x000FFFFFFFFFF000ull;
@@ -360,6 +363,19 @@ void process::install_bundled() {
         const EmbeddedRun& r = run_embedded[i];
         String path = vfs::join(dir.c_str(), r.name);
         if (vfs::write_file(path.c_str(), r.data, (uint32_t)r.size)) klog("Programas: instalado %s\n", path.c_str());
+    }
+    vfs::SystemWrite sw;   // los recursos de Linux van en C:\BrysOS\Linux (protegida)
+    for (uint64_t i = 0; i < files_embedded_count; i++) {
+        const EmbeddedRun& r = files_embedded[i];
+        String path = String("C:\\") + r.name;
+        // crea las carpetas que falten, de fuera hacia dentro
+        for (size_t k = 3; k < path.size(); k++)
+            if (path[k] == '\\') {
+                String d = path.substr(0, k);
+                if (!vfs::is_dir(d.c_str())) vfs::mkdir(d.c_str());
+            }
+        if (vfs::write_file(path.c_str(), r.data, (uint32_t)r.size)) klog("Programas: instalado %s\n", path.c_str());
+        else klog("Programas: no se ha podido escribir %s\n", path.c_str());
     }
     vfs::write_file(marker.c_str(), BRYSOS_VERSION "\r\n", (uint32_t)strlen(BRYSOS_VERSION) + 2);
 }

@@ -59,7 +59,8 @@ enum {
     EV_RATON_ABAJO,         /* en el lienzo (x, y, botones) */
     EV_RATON_ARRIBA,
     EV_RATON_MOVER,
-    EV_TEMPORIZADOR
+    EV_TEMPORIZADOR,
+    EV_RUEDA                /* rueda del ratón en el lienzo (x, y; tecla = pasos, > 0 hacia abajo) */
 };
 
 typedef struct Evento {
@@ -79,7 +80,8 @@ enum {
     TECLA_RETROCESO = 8, TECLA_TAB = 9, TECLA_INTRO = 13, TECLA_ESC = 27,
     TECLA_ARRIBA = 0x101, TECLA_ABAJO, TECLA_IZQUIERDA, TECLA_DERECHA,
     TECLA_INICIO, TECLA_FIN, TECLA_REPAG, TECLA_AVPAG, TECLA_INSERT, TECLA_SUPR,
-    TECLA_F1
+    TECLA_F1,
+    TECLA_MAYUS_IZQ = TECLA_F1 + 12, TECLA_MAYUS_DER, TECLA_CTRL_IZQ, TECLA_CTRL_DER
 };
 
 #define RUN_BASE      0x400000ull          /* dirección de carga de los programas */

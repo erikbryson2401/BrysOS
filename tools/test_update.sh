@@ -5,17 +5,17 @@ set -e
 cd "$(dirname "$0")/.."
 sh tools/test_install.sh >/dev/null 2>&1
 # archivo que el paquete debe borrar y otro que debe sobrescribir
-echo "viejo" > /tmp/viejo.txt
-echo "version anterior" > /tmp/leeme.txt
-mcopy -o -i build/disk.img@@1M /tmp/viejo.txt ::/BRYSOS/VIEJO.TXT
-mcopy -o -i build/disk.img@@1M /tmp/leeme.txt ::/BRYSOS/LEEME.TXT
+echo "viejo" > build/viejo.txt
+echo "version anterior" > build/leeme.txt
+mcopy -o -i build/disk.img@@1M build/viejo.txt ::/BRYSOS/VIEJO.TXT
+mcopy -o -i build/disk.img@@1M build/leeme.txt ::/BRYSOS/LEEME.TXT
 # paquete 1.1 con el núcleo recompilado
 make -j8 bsi VERSION=1.1 BSI=build/ACTUALIZA.BSI >/dev/null
-echo "Notas de la version 1.1 de prueba" > /tmp/leeme.txt
-echo "archivo nuevo en una carpeta nueva" > /tmp/nuevo.txt
+echo "Notas de la version 1.1 de prueba" > build/leeme.txt
+echo "archivo nuevo en una carpeta nueva" > build/nuevo.txt
 python3 tools/mkbsi.py -o build/ACTUALIZA.BSI --version 1.1 --name "BrysOS 1.1 (prueba)" \
     --desc "Paquete de prueba generado por tools/test_update.sh." --desc "Sustituye el núcleo y algunos archivos." \
-    --delete viejo.txt build/kernel-bsi.elf:kernel.elf /tmp/leeme.txt:leeme.txt /tmp/nuevo.txt:extras/nuevo.txt
+    --delete viejo.txt build/kernel-bsi.elf:kernel.elf build/leeme.txt:leeme.txt build/nuevo.txt:extras/nuevo.txt
 make -j8 >/dev/null   # vuelve a dejar la ISO en la versión 1.0
 sh tools/make_stick.sh build/ACTUALIZA.BSI >/dev/null
 # arranca el sistema instalado con el pendrive y abre el paquete con Ejecutar

@@ -368,6 +368,18 @@ def package(p):
     png_icon(p, "bsi.png")
 
 
+def internet(p):
+    # globo terráqueo: océano azul, continentes verdes, meridianos y un brillo
+    p.ellipse(3, 3, 29, 29, B, NAVY)
+    p.poly([(9, 8), (15, 6), (17, 10), (14, 14), (15, 19), (11, 21), (8, 16), (6, 11)], GR, DGR)
+    p.poly([(19, 14), (25, 12), (27, 17), (24, 24), (20, 22)], GR, DGR)
+    p.poly([(17, 5), (22, 6), (20, 8)], GR, DGR)
+    p.line(16, 3, 16, 29, C)
+    p.line(3, 16, 29, 16, C)
+    p.ellipse(9, 3, 23, 29, None, C)
+    p.rect(8, 7, 10, 9, W)
+
+
 ICONS = [
     ("computer", computer), ("folder", folder), ("folder_open", folder_open), ("mydocs", mydocs),
     ("recycle", recycle), ("hdd", hdd), ("file_text", file_text), ("file", file_generic),
@@ -378,6 +390,7 @@ ICONS = [
     ("up_folder", up_folder), ("arrow_left", arrow_left), ("arrow_right", arrow_right), ("cut", cut),
     ("copy", copy), ("paste", paste), ("delete", delete), ("views", views), ("props", props),
     ("usbdrive", usbdrive), ("package", package), ("sound", sound),
+    ("internet", internet),
 ]
 
 

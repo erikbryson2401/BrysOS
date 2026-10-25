@@ -1,0 +1,9 @@
+Nombre: Certificados raíz de Mozilla
+es: Los certificados de las autoridades de confianza para HTTPS (cacert.pem de curl, a partir de los de Mozilla).
+en: The trusted root certificates for HTTPS (curl's cacert.pem, extracted from Mozilla's).
+---
+CA certificates extracted from Mozilla (https://curl.se/docs/caextract.html).
+
+This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+If a copy of the MPL was not distributed with this file, You can obtain one at
+https://mozilla.org/MPL/2.0/.
